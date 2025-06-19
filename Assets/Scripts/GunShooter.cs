@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class GunShooter : MonoBehaviour
 {
@@ -7,6 +7,7 @@ public class GunShooter : MonoBehaviour
 
     [Header("Damage Multipliers")]
     public float headshotMultiplier = 2f;
+    public float bodyshotMultiplier = 1f;
 
     void Start()
     {
@@ -30,19 +31,28 @@ public class GunShooter : MonoBehaviour
                 Enemy enemy = hit.collider.GetComponentInParent<Enemy>();
                 if (enemy != null)
                 {
-                    float appliedDamage = weapon.damage;
+                    float finalDamage = weapon.damage;
 
-                    // Check if the hit collider is the head
-                    if (hit.collider.name.ToLower().Contains("head"))
+                    string hitPart = hit.collider.name.ToLower();
+
+                    if (hitPart.Contains("head"))
                     {
-                        appliedDamage *= headshotMultiplier;
-                        Debug.Log("Headshot!");
+                        finalDamage *= headshotMultiplier;
+                        Debug.Log("💥 HEADSHOT! Dealing " + finalDamage + " damage to " + enemy.gameObject.name);
+                    }
+                    else if (hitPart.Contains("body"))
+                    {
+                        finalDamage *= bodyshotMultiplier;
+                        Debug.Log("🔫 BODY SHOT. Dealing " + finalDamage + " damage to " + enemy.gameObject.name);
+                    }
+                    else
+                    {
+                        // fallback: just log raw damage
+                        Debug.Log("🟡 Hit unknown part '" + hit.collider.name + "'. Dealing " + finalDamage + " damage.");
                     }
 
-                    enemy.TakeDamage(appliedDamage);
+                    enemy.TakeDamage(finalDamage);
                 }
-
-                // Optional: hit effect, sound, etc.
             }
         }
 

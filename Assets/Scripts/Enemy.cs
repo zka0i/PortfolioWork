@@ -1,10 +1,13 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
     [Header("Enemy Stats")]
     public float maxHealth = 100f;
     public float damageAmount = 10f;
+    public float damageInterval = 1f;
+
+    [HideInInspector] public float lastDamageTime;
     private float currentHealth;
 
     void Start()
@@ -15,6 +18,7 @@ public class Enemy : MonoBehaviour
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
+        Debug.Log("Enemy took damage: " + amount + " | Current HP: " + currentHealth);
 
         if (currentHealth <= 0f)
         {
@@ -24,18 +28,7 @@ public class Enemy : MonoBehaviour
 
     void Die()
     {
+        Debug.Log("💀 Enemy died.");
         Destroy(gameObject);
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            PlayerStats playerStats = other.GetComponent<PlayerStats>();
-            if (playerStats != null)
-            {
-                playerStats.TakeDamage(damageAmount);
-            }
-        }
     }
 }
