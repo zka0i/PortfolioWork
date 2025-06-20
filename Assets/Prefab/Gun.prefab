@@ -205,7 +205,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   weaponName: Gun
-  damage: 50
+  damage: 25
   fireRate: 0.1
   range: 100
   maxAmmo: 100
@@ -224,8 +224,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 679eb51dc7cd1f648a51a919d310faab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scopedPosition: {x: -0.56, y: -1.66, z: -0.192}
-  scopedRotation: {x: 0, y: 0, z: 0}
+  normalLocalPosition: {x: 0, y: 0, z: 0}
+  scopedLocalPosition: {x: -0.505, y: 0.051, z: -0.15}
+  aimSmoothing: 10
+  isAiming: 0
 --- !u!1 &943637354834997157
 GameObject:
   m_ObjectHideFlags: 0

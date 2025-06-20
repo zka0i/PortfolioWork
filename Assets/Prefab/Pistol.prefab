@@ -246,8 +246,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 679eb51dc7cd1f648a51a919d310faab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scopedPosition: {x: 0.048, y: 1.497, z: 1.01}
-  scopedRotation: {x: 0, y: 0, z: 0}
+  normalLocalPosition: {x: 0, y: 0, z: 0}
+  scopedLocalPosition: {x: -0.483, y: 0.106, z: 0.034}
+  aimSmoothing: 10
+  isAiming: 0
 --- !u!1 &6123858052396523561
 GameObject:
   m_ObjectHideFlags: 0

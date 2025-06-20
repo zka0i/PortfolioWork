@@ -20,7 +20,6 @@ public class GunShooter : MonoBehaviour
         Weapon weapon = weaponManager.GetCurrentWeapon();
         if (weapon == null || cam == null) return;
 
-        // Shooting
         if (Input.GetButton("Fire1") && weapon.CanShoot())
         {
             weapon.Shoot();
@@ -28,35 +27,16 @@ public class GunShooter : MonoBehaviour
             Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
             if (Physics.Raycast(ray, out RaycastHit hit, weapon.range))
             {
-                Enemy enemy = hit.collider.GetComponentInParent<Enemy>();
-                if (enemy != null)
+                EnemyHitbox hitbox = hit.collider.GetComponent<EnemyHitbox>();
+                if (hitbox != null && hitbox.enemy != null)
                 {
-                    float finalDamage = weapon.damage;
-
-                    string hitPart = hit.collider.name.ToLower();
-
-                    if (hitPart.Contains("head"))
-                    {
-                        finalDamage *= headshotMultiplier;
-                        Debug.Log("💥 HEADSHOT! Dealing " + finalDamage + " damage to " + enemy.gameObject.name);
-                    }
-                    else if (hitPart.Contains("body"))
-                    {
-                        finalDamage *= bodyshotMultiplier;
-                        Debug.Log("🔫 BODY SHOT. Dealing " + finalDamage + " damage to " + enemy.gameObject.name);
-                    }
-                    else
-                    {
-                        // fallback: just log raw damage
-                        Debug.Log("🟡 Hit unknown part '" + hit.collider.name + "'. Dealing " + finalDamage + " damage.");
-                    }
-
-                    enemy.TakeDamage(finalDamage);
+                    float finalDamage = weapon.damage * (hitbox.isHead ? headshotMultiplier : bodyshotMultiplier);
+                    Debug.Log((hitbox.isHead ? "💥 HEADSHOT" : "🔫 BODY SHOT") + $" for {finalDamage} damage");
+                    hitbox.ApplyDamage(finalDamage);
                 }
             }
         }
 
-        // Reloading
         if (Input.GetKeyDown(KeyCode.R))
         {
             weapon.Reload();

@@ -16,6 +16,9 @@ public class WeaponManager : MonoBehaviour
 
     void Update()
     {
+        // Prevent switching while aiming (right-click held)
+        if (Input.GetMouseButton(1)) return;
+
         if (Input.GetKeyDown(KeyCode.Alpha1)) EquipWeapon(0);
         if (Input.GetKeyDown(KeyCode.Alpha2)) EquipWeapon(1);
     }
