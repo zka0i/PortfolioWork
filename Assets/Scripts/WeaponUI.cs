@@ -8,6 +8,9 @@ public class WeaponUI : MonoBehaviour
     public TextMeshProUGUI ammoText;
     public Image weaponIconImage;
 
+    [Header("UI")]
+    public Sprite weaponIcon;
+
     private WeaponManager weaponManager;
 
     void Start()

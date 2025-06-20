@@ -96,7 +96,6 @@ GameObject:
   - component: {fileID: 3158246179915850865}
   - component: {fileID: 2635149502447035705}
   - component: {fileID: 5655150006053038245}
-  - component: {fileID: 6254367738610262793}
   m_Layer: 0
   m_Name: Gun
   m_TagString: PrimaryWeapon
@@ -212,22 +211,16 @@ MonoBehaviour:
   reloadTime: 1.5
   currentAmmo: 80
   weaponIcon: {fileID: 21300000, guid: 48f7b1ebcd236da4e8a51a9de014461d, type: 3}
---- !u!114 &6254367738610262793
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 618307770956205519}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 679eb51dc7cd1f648a51a919d310faab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  normalLocalPosition: {x: 0, y: 0, z: 0}
-  scopedLocalPosition: {x: -0.505, y: 0.051, z: -0.15}
-  aimSmoothing: 10
-  isAiming: 0
+  modelTransform: {fileID: 2490209607501151114}
+  recoilKick: {x: 0, y: 0, z: -0.1}
+  recoilReturnSpeed: 5
+  scopeOffset: {x: -0.505, y: 0.051, z: -0.15}
+  scopeSpeed: 10
+  zoomFOV: 30
+  shootSound: {fileID: 8300000, guid: 8b15aefb7a3a1ee458dbb3527ff87ff8, type: 3}
+  equipSound: {fileID: 8300000, guid: 2c35a25151f39d74e99ecb961aacceea, type: 3}
+  shootVolume: 0.3
+  equipVolume: 0.5
 --- !u!1 &943637354834997157
 GameObject:
   m_ObjectHideFlags: 0
