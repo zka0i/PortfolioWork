@@ -15,8 +15,10 @@ public class WeaponManager : MonoBehaviour
     private GameObject currentWeaponObject;
     private int currentIndex = -1;
 
-    // Ammo tracking
     private int[] weaponAmmo;
+
+    // Block switching externally (e.g. from build mode)
+    private bool disableSwitching = false;
 
     void Start()
     {
@@ -28,12 +30,12 @@ public class WeaponManager : MonoBehaviour
             if (wpn != null) weaponAmmo[i] = wpn.maxAmmo;
         }
 
-        EquipWeapon(0); // Equip primary by default
+        EquipWeapon(0); // Equip primary weapon at start
     }
 
     void Update()
     {
-        if (Weapon.IsScoping) return; // Prevent swapping while scoping
+        if (disableSwitching || Weapon.IsScoping) return;
 
         if (Input.GetKeyDown(KeyCode.Alpha1)) EquipWeapon(0);
         if (Input.GetKeyDown(KeyCode.Alpha2)) EquipWeapon(1);
@@ -43,25 +45,20 @@ public class WeaponManager : MonoBehaviour
     {
         if (index >= weaponPrefabs.Length || index == currentIndex) return;
 
-        // Save ammo before switching
         if (currentWeapon != null)
             weaponAmmo[currentIndex] = currentWeapon.currentAmmo;
 
-        // Destroy current weapon
         if (currentWeaponObject != null)
             Destroy(currentWeaponObject);
 
-        // Instantiate new weapon
         currentWeaponObject = Instantiate(weaponPrefabs[index], weaponHolder);
         currentWeaponObject.transform.localPosition = Vector3.zero;
         currentWeaponObject.transform.localRotation = Quaternion.identity;
 
-        // Setup new weapon
         currentWeapon = currentWeaponObject.GetComponent<Weapon>();
         currentWeapon.currentAmmo = weaponAmmo[index];
         currentIndex = index;
 
-        // Play equip sound
         if (audioSource != null && equipSounds != null && index < equipSounds.Length && equipSounds[index] != null)
         {
             audioSource.PlayOneShot(equipSounds[index], equipVolume);
@@ -76,5 +73,11 @@ public class WeaponManager : MonoBehaviour
     public GameObject GetCurrentWeaponObject()
     {
         return currentWeaponObject;
+    }
+
+    // --- NEW FUNCTIONALITY ---
+    public void DisableWeaponSwitching(bool value)
+    {
+        disableSwitching = value;
     }
 }

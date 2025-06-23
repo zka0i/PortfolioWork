@@ -44,6 +44,9 @@ public class Weapon : MonoBehaviour
     // Static flag for WeaponManager to check
     public static bool IsScoping = false;
 
+    // Reference to build tool to check build mode
+    private WeaponBuildTool buildTool;
+
     void Start()
     {
         originalLocalPos = modelTransform.localPosition;
@@ -59,6 +62,9 @@ public class Weapon : MonoBehaviour
         {
             audioSource.PlayOneShot(equipSound, equipVolume);
         }
+
+        // Find build tool
+        buildTool = FindObjectOfType<WeaponBuildTool>();
     }
 
     void Update()
@@ -75,10 +81,19 @@ public class Weapon : MonoBehaviour
 
         // Camera zoom
         Camera.main.fieldOfView = Mathf.Lerp(Camera.main.fieldOfView, isScoping ? zoomFOV : defaultFOV, Time.deltaTime * scopeSpeed);
+
+        // Prevent firing in build mode
+        if (buildTool != null && buildTool.IsBuilding()) return;
+
+        if (Input.GetButton("Fire1") && CanShoot())
+        {
+            Shoot();
+        }
     }
 
     public bool CanShoot()
     {
+        if (buildTool != null && buildTool.IsBuilding()) return false;
         return Time.time >= nextFireTime && !isReloading && currentAmmo > 0;
     }
 

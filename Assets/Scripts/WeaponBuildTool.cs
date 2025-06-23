@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class WeaponBuildTool : MonoBehaviour
 {
@@ -8,20 +9,28 @@ public class WeaponBuildTool : MonoBehaviour
     public LayerMask groundLayer;
 
     [Header("Hammer Hand")]
-    public GameObject hammerHandPrefab; // Assign your hammer model
+    public GameObject hammerHandPrefab;
     private GameObject hammerHandInstance;
 
     [Header("Weapon Manager")]
-    public WeaponManager weaponManager; // Assign reference in Inspector
+    public WeaponManager weaponManager;
 
     private int currentBuildIndex = 0;
     private GameObject currentPreview;
     private bool isBuilding = false;
     private Camera cam;
 
+    // Track placements allowed per prefab
+    private Dictionary<int, int> buildPlacements = new Dictionary<int, int>();
+
     void Start()
     {
         cam = Camera.main;
+
+        for (int i = 0; i < buildPrefabs.Length; i++)
+        {
+            buildPlacements[i] = 0;
+        }
     }
 
     void Update()
@@ -43,12 +52,17 @@ public class WeaponBuildTool : MonoBehaviour
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         if (scroll != 0f)
         {
+            int previousIndex = currentBuildIndex;
             currentBuildIndex += scroll > 0 ? 1 : -1;
             currentBuildIndex = Mathf.Clamp(currentBuildIndex, 0, buildPrefabs.Length - 1);
-            SwitchPreview();
+
+            if (previousIndex != currentBuildIndex)
+            {
+                SwitchPreview();
+            }
         }
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && buildPlacements[currentBuildIndex] > 0)
         {
             PlaceObject();
         }
@@ -56,43 +70,46 @@ public class WeaponBuildTool : MonoBehaviour
 
     void EnterBuildMode()
     {
-        if (buildPrefabs.Length == 0) return;
-
-        // Hide weapon
         if (weaponManager != null && weaponManager.GetCurrentWeaponObject() != null)
+        {
             weaponManager.GetCurrentWeaponObject().SetActive(false);
+            weaponManager.DisableWeaponSwitching(true); // Prevent switching
+        }
 
-        // Spawn hammer hand
         hammerHandInstance = Instantiate(hammerHandPrefab, weaponManager.weaponHolder);
         hammerHandInstance.transform.localPosition = Vector3.zero;
         hammerHandInstance.transform.localRotation = Quaternion.identity;
 
-        // Spawn first preview
-        currentPreview = Instantiate(buildPrefabs[currentBuildIndex]);
-        SetPreviewVisuals(true);
+        if (buildPlacements[currentBuildIndex] > 0)
+        {
+            currentPreview = Instantiate(buildPrefabs[currentBuildIndex]);
+            SetPreviewVisuals(true);
+        }
     }
 
     void ExitBuildMode()
     {
-        // Restore weapon
         if (weaponManager != null && weaponManager.GetCurrentWeaponObject() != null)
+        {
             weaponManager.GetCurrentWeaponObject().SetActive(true);
+            weaponManager.DisableWeaponSwitching(false); // Re-enable switching
+        }
 
-        // Remove hammer hand
         if (hammerHandInstance != null)
             Destroy(hammerHandInstance);
 
-        // Remove preview
         DestroyPreview();
     }
 
     void SwitchPreview()
     {
-        if (currentPreview != null)
-            Destroy(currentPreview);
+        DestroyPreview();
 
-        currentPreview = Instantiate(buildPrefabs[currentBuildIndex]);
-        SetPreviewVisuals(true);
+        if (buildPlacements[currentBuildIndex] > 0)
+        {
+            currentPreview = Instantiate(buildPrefabs[currentBuildIndex]);
+            SetPreviewVisuals(true);
+        }
     }
 
     void DestroyPreview()
@@ -120,12 +137,13 @@ public class WeaponBuildTool : MonoBehaviour
 
     void UpdatePreviewPosition()
     {
+        if (currentPreview == null) return;
+
         Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
         if (Physics.Raycast(ray, out RaycastHit hit, maxBuildDistance, groundLayer))
         {
             currentPreview.transform.position = hit.point;
 
-            // Rotate to face the same direction as camera (ignoring pitch)
             Vector3 forward = cam.transform.forward;
             forward.y = 0f;
             if (forward != Vector3.zero)
@@ -138,6 +156,29 @@ public class WeaponBuildTool : MonoBehaviour
         if (currentPreview == null) return;
 
         Instantiate(buildPrefabs[currentBuildIndex], currentPreview.transform.position, currentPreview.transform.rotation);
-        Debug.Log("🔨 Placed: " + buildPrefabs[currentBuildIndex].name);
+        buildPlacements[currentBuildIndex]--;
+        Debug.Log($"🔨 Placed: {buildPrefabs[currentBuildIndex].name}, Remaining: {buildPlacements[currentBuildIndex]}");
+
+        if (buildPlacements[currentBuildIndex] <= 0)
+        {
+            ExitBuildMode();
+        }
+    }
+
+    public void AddPlacement(int prefabIndex, int amount)
+    {
+        if (prefabIndex < 0 || prefabIndex >= buildPrefabs.Length) return;
+        buildPlacements[prefabIndex] += amount;
+        Debug.Log($"✅ Picked up {amount}x {buildPrefabs[prefabIndex].name}");
+    }
+
+    public bool IsBuilding()
+    {
+        return isBuilding;
+    }
+
+    public GameObject GetCurrentWeaponObject()
+    {
+        return weaponManager != null ? weaponManager.GetCurrentWeaponObject() : null;
     }
 }
