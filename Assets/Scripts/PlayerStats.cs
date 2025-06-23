@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class PlayerStats : MonoBehaviour
 {
@@ -15,7 +16,13 @@ public class PlayerStats : MonoBehaviour
     public float sprintStaminaCost = 20f;
     public Slider staminaBar;
 
+    [Header("Powerup Effects")]
+    public float energyDrinkDuration = 10f;
+    public float speedBoostMultiplier = 1.5f;
+
     private PlayerMovement movement;
+    private bool isUsingEnergyDrink = false;
+    private float originalSprintSpeed;
 
     void Start()
     {
@@ -26,12 +33,12 @@ public class PlayerStats : MonoBehaviour
         if (staminaBar) staminaBar.maxValue = maxStamina;
 
         movement = GetComponent<PlayerMovement>();
+        originalSprintSpeed = movement.sprintSpeed;
     }
 
     void Update()
     {
         UpdateUI();
-
         HandleStamina();
     }
 
@@ -43,6 +50,8 @@ public class PlayerStats : MonoBehaviour
 
     void HandleStamina()
     {
+        if (isUsingEnergyDrink) return;
+
         bool isSprinting = Input.GetKey(KeyCode.LeftShift) && movement.IsMoving();
 
         if (isSprinting && currentStamina > 0)
@@ -67,5 +76,32 @@ public class PlayerStats : MonoBehaviour
     {
         currentHealth += amount;
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
+    }
+
+    public void UseMedkit()
+    {
+        Heal(maxHealth);
+    }
+
+    public void UseBandage()
+    {
+        Heal(30f);
+    }
+
+    public void UseEnergyDrink()
+    {
+        if (isUsingEnergyDrink) return;
+        StartCoroutine(EnergyDrinkRoutine());
+    }
+
+    private IEnumerator EnergyDrinkRoutine()
+    {
+        isUsingEnergyDrink = true;
+        movement.sprintSpeed *= speedBoostMultiplier;
+
+        yield return new WaitForSeconds(energyDrinkDuration);
+
+        movement.sprintSpeed = originalSprintSpeed;
+        isUsingEnergyDrink = false;
     }
 }

@@ -8,6 +8,11 @@ public class WeaponBuildTool : MonoBehaviour
     public float maxBuildDistance = 5f;
     public LayerMask groundLayer;
 
+    [Header("Placement Audio")]
+    public AudioClip[] placeSounds; // Match index with buildPrefabs
+    public float placeVolume = 1f;
+    private AudioSource audioSource;
+
     [Header("Hammer Hand")]
     public GameObject hammerHandPrefab;
     private GameObject hammerHandInstance;
@@ -20,12 +25,16 @@ public class WeaponBuildTool : MonoBehaviour
     private bool isBuilding = false;
     private Camera cam;
 
-    // Track placements allowed per prefab
     private Dictionary<int, int> buildPlacements = new Dictionary<int, int>();
 
     void Start()
     {
         cam = Camera.main;
+
+        // Setup audio source
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
 
         for (int i = 0; i < buildPrefabs.Length; i++)
         {
@@ -57,9 +66,7 @@ public class WeaponBuildTool : MonoBehaviour
             currentBuildIndex = Mathf.Clamp(currentBuildIndex, 0, buildPrefabs.Length - 1);
 
             if (previousIndex != currentBuildIndex)
-            {
                 SwitchPreview();
-            }
         }
 
         if (Input.GetMouseButtonDown(0) && buildPlacements[currentBuildIndex] > 0)
@@ -73,7 +80,7 @@ public class WeaponBuildTool : MonoBehaviour
         if (weaponManager != null && weaponManager.GetCurrentWeaponObject() != null)
         {
             weaponManager.GetCurrentWeaponObject().SetActive(false);
-            weaponManager.DisableWeaponSwitching(true); // Prevent switching
+            weaponManager.DisableWeaponSwitching(true);
         }
 
         hammerHandInstance = Instantiate(hammerHandPrefab, weaponManager.weaponHolder);
@@ -92,7 +99,7 @@ public class WeaponBuildTool : MonoBehaviour
         if (weaponManager != null && weaponManager.GetCurrentWeaponObject() != null)
         {
             weaponManager.GetCurrentWeaponObject().SetActive(true);
-            weaponManager.DisableWeaponSwitching(false); // Re-enable switching
+            weaponManager.DisableWeaponSwitching(false);
         }
 
         if (hammerHandInstance != null)
@@ -157,6 +164,13 @@ public class WeaponBuildTool : MonoBehaviour
 
         Instantiate(buildPrefabs[currentBuildIndex], currentPreview.transform.position, currentPreview.transform.rotation);
         buildPlacements[currentBuildIndex]--;
+
+        // 🔊 Play placement audio if available
+        if (placeSounds != null && currentBuildIndex < placeSounds.Length && placeSounds[currentBuildIndex] != null)
+        {
+            audioSource.PlayOneShot(placeSounds[currentBuildIndex], placeVolume);
+        }
+
         Debug.Log($"🔨 Placed: {buildPrefabs[currentBuildIndex].name}, Remaining: {buildPlacements[currentBuildIndex]}");
 
         if (buildPlacements[currentBuildIndex] <= 0)

@@ -46,11 +46,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ad45118363b45c48ae47faea811fee2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buildTool: {fileID: 0}
   prefabIndex: 0
-  amountToAdd: 2
+  amount: 2
   highlightObject: {fileID: 2152104786702388767}
-  highlightDistance: 4
+  buildTool: {fileID: 0}
+  interactRange: 3
+  pickupSound: {fileID: 8300000, guid: a434b692d9a6821459908b659fb67e56, type: 3}
 --- !u!1001 &423327737475373467
 PrefabInstance:
   m_ObjectHideFlags: 0
