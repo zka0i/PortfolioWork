@@ -1,4 +1,5 @@
-using UnityEngine;
+﻿using UnityEngine;
+using System;
 
 public class PowerupPickup : MonoBehaviour
 {
@@ -7,8 +8,10 @@ public class PowerupPickup : MonoBehaviour
     public float pickupRange = 3f;
 
     [Header("Audio")]
-    public AudioClip useSound; // Assign unique clip on each prefab
+    public AudioClip useSound;
     public float volume = 1f;
+
+    public Action OnPickedUp;
 
     private Transform player;
     private PlayerStats stats;
@@ -23,7 +26,6 @@ public class PowerupPickup : MonoBehaviour
             stats = player.GetComponent<PlayerStats>();
             playerAudio = player.GetComponent<AudioSource>();
 
-            // Add AudioSource if not already there
             if (playerAudio == null)
                 playerAudio = player.gameObject.AddComponent<AudioSource>();
         }
@@ -43,7 +45,6 @@ public class PowerupPickup : MonoBehaviour
 
     void ApplyEffect()
     {
-        // Play sound from player's AudioSource
         if (useSound != null && playerAudio != null)
         {
             playerAudio.PlayOneShot(useSound, volume);
@@ -54,16 +55,16 @@ public class PowerupPickup : MonoBehaviour
             case PowerupType.Medkit:
                 stats.Heal(stats.maxHealth);
                 break;
-
             case PowerupType.Bandage:
                 stats.Heal(30f);
                 break;
-
             case PowerupType.EnergyDrink:
                 stats.UseEnergyDrink();
                 break;
         }
 
-        Destroy(gameObject);
+        OnPickedUp?.Invoke();
+
+        Destroy(gameObject); // ✅ Destroy immediately now that sound plays from player
     }
 }
