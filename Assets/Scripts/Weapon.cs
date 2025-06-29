@@ -18,7 +18,7 @@ public class Weapon : MonoBehaviour
     public Sprite weaponIcon;
 
     [Header("Recoil")]
-    public Transform modelTransform; // Assign this in Inspector
+    public Transform modelTransform;
     public Vector3 recoilKick = new Vector3(0f, 0f, -0.05f);
     public float recoilReturnSpeed = 5f;
     private Vector3 recoilOffset;
@@ -41,30 +41,41 @@ public class Weapon : MonoBehaviour
     private float nextFireTime = 0f;
     private bool isReloading = false;
 
-    // Static flag for WeaponManager to check
     public static bool IsScoping = false;
-
-    // Reference to build tool to check build mode
     private WeaponBuildTool buildTool;
+
+    [Header("Muzzle Flash")]
+    public Light muzzleFlashLight;
+    public float flashDuration = 0.05f;
+    public Sprite[] muzzleFlashSprites;     // Your sprite options
+    public SpriteRenderer muzzleFlashRenderer; // Your single flash SpriteRenderer GameObject
+
+    [Header("Bullet Tracer")]
+    public LineRenderer bulletLinePrefab;
+    public Transform muzzlePoint;
+    public float tracerDuration = 0.05f;
 
     void Start()
     {
         originalLocalPos = modelTransform.localPosition;
         defaultFOV = Camera.main.fieldOfView;
 
-        // Set up audio source
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
             audioSource = gameObject.AddComponent<AudioSource>();
 
-        // Play equip sound on spawn
         if (equipSound != null)
-        {
             audioSource.PlayOneShot(equipSound, equipVolume);
-        }
 
-        // Find build tool
         buildTool = FindObjectOfType<WeaponBuildTool>();
+
+        if (muzzleFlashLight != null)
+            muzzleFlashLight.enabled = false;
+
+        if (muzzleFlashRenderer != null)
+            muzzleFlashRenderer.enabled = false;
+
+        currentAmmo = maxAmmo;
     }
 
     void Update()
@@ -72,17 +83,13 @@ public class Weapon : MonoBehaviour
         isScoping = Input.GetButton("Fire2");
         IsScoping = isScoping;
 
-        // Apply scope and recoil offset
         Vector3 targetPos = originalLocalPos + (isScoping ? scopeOffset : Vector3.zero) + recoilOffset;
         modelTransform.localPosition = Vector3.Lerp(modelTransform.localPosition, targetPos, Time.deltaTime * scopeSpeed);
 
-        // Recoil recovery
         recoilOffset = Vector3.Lerp(recoilOffset, Vector3.zero, Time.deltaTime * recoilReturnSpeed);
 
-        // Camera zoom
         Camera.main.fieldOfView = Mathf.Lerp(Camera.main.fieldOfView, isScoping ? zoomFOV : defaultFOV, Time.deltaTime * scopeSpeed);
 
-        // Prevent firing in build mode
         if (buildTool != null && buildTool.IsBuilding()) return;
 
         if (Input.GetButton("Fire1") && CanShoot())
@@ -111,9 +118,13 @@ public class Weapon : MonoBehaviour
             audioSource.PlayOneShot(shootSound, shootVolume);
         }
 
+        Vector3 hitPoint = Camera.main.transform.position + Camera.main.transform.forward * range;
+
         Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         if (Physics.Raycast(ray, out RaycastHit hit, range))
         {
+            hitPoint = hit.point;
+
             Enemy enemy = hit.collider.GetComponent<Enemy>();
             if (enemy != null)
             {
@@ -122,6 +133,40 @@ public class Weapon : MonoBehaviour
         }
 
         Debug.Log(weaponName + " fired! Remaining ammo: " + currentAmmo);
+
+        StartCoroutine(DoMuzzleFlash());
+        StartCoroutine(SpawnBulletTracer(muzzlePoint.position, hitPoint));
+    }
+
+    IEnumerator DoMuzzleFlash()
+    {
+        if (muzzleFlashLight != null)
+            muzzleFlashLight.enabled = true;
+
+        if (muzzleFlashRenderer != null && muzzleFlashSprites.Length > 0)
+        {
+            muzzleFlashRenderer.sprite = muzzleFlashSprites[Random.Range(0, muzzleFlashSprites.Length)];
+            muzzleFlashRenderer.enabled = true;
+        }
+
+        yield return new WaitForSeconds(flashDuration);
+
+        if (muzzleFlashLight != null)
+            muzzleFlashLight.enabled = false;
+
+        if (muzzleFlashRenderer != null)
+            muzzleFlashRenderer.enabled = false;
+    }
+
+    private IEnumerator SpawnBulletTracer(Vector3 start, Vector3 end)
+    {
+        LineRenderer line = Instantiate(bulletLinePrefab);
+        line.SetPosition(0, start);
+        line.SetPosition(1, end);
+
+        yield return new WaitForSeconds(tracerDuration);
+
+        Destroy(line.gameObject);
     }
 
     public void Reload()
