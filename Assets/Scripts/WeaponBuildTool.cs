@@ -31,7 +31,6 @@ public class WeaponBuildTool : MonoBehaviour
     {
         cam = Camera.main;
 
-        // Setup audio source
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
             audioSource = gameObject.AddComponent<AudioSource>();
@@ -165,7 +164,6 @@ public class WeaponBuildTool : MonoBehaviour
         Instantiate(buildPrefabs[currentBuildIndex], currentPreview.transform.position, currentPreview.transform.rotation);
         buildPlacements[currentBuildIndex]--;
 
-        // 🔊 Play placement audio if available
         if (placeSounds != null && currentBuildIndex < placeSounds.Length && placeSounds[currentBuildIndex] != null)
         {
             audioSource.PlayOneShot(placeSounds[currentBuildIndex], placeVolume);
@@ -173,9 +171,10 @@ public class WeaponBuildTool : MonoBehaviour
 
         Debug.Log($"🔨 Placed: {buildPrefabs[currentBuildIndex].name}, Remaining: {buildPlacements[currentBuildIndex]}");
 
+        // ✅ DON’T exit build mode automatically — just destroy preview if none left
         if (buildPlacements[currentBuildIndex] <= 0)
         {
-            ExitBuildMode();
+            DestroyPreview();
         }
     }
 

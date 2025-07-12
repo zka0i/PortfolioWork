@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class WeaponManager : MonoBehaviour
 {
@@ -8,7 +8,7 @@ public class WeaponManager : MonoBehaviour
 
     [Header("Audio")]
     public AudioSource audioSource;
-    public AudioClip[] equipSounds; // Should match weaponPrefabs size
+    public AudioClip[] equipSounds;
     [Range(0f, 1f)] public float equipVolume = 0.5f;
 
     private Weapon currentWeapon;
@@ -16,8 +16,6 @@ public class WeaponManager : MonoBehaviour
     private int currentIndex = -1;
 
     private int[] weaponAmmo;
-
-    // Block switching externally (e.g. from build mode)
     private bool disableSwitching = false;
 
     void Start()
@@ -30,7 +28,7 @@ public class WeaponManager : MonoBehaviour
             if (wpn != null) weaponAmmo[i] = wpn.maxAmmo;
         }
 
-        EquipWeapon(0); // Equip primary weapon at start
+        EquipWeapon(0);
     }
 
     void Update()
@@ -46,7 +44,11 @@ public class WeaponManager : MonoBehaviour
         if (index >= weaponPrefabs.Length || index == currentIndex) return;
 
         if (currentWeapon != null)
+        {
+            // Stop reload properly
+            currentWeapon.CancelReload();
             weaponAmmo[currentIndex] = currentWeapon.currentAmmo;
+        }
 
         if (currentWeaponObject != null)
             Destroy(currentWeaponObject);
@@ -57,6 +59,7 @@ public class WeaponManager : MonoBehaviour
 
         currentWeapon = currentWeaponObject.GetComponent<Weapon>();
         currentWeapon.currentAmmo = weaponAmmo[index];
+
         currentIndex = index;
 
         if (audioSource != null && equipSounds != null && index < equipSounds.Length && equipSounds[index] != null)
@@ -65,19 +68,9 @@ public class WeaponManager : MonoBehaviour
         }
     }
 
-    public Weapon GetCurrentWeapon()
-    {
-        return currentWeapon;
-    }
+    public Weapon GetCurrentWeapon() => currentWeapon;
 
-    public GameObject GetCurrentWeaponObject()
-    {
-        return currentWeaponObject;
-    }
+    public GameObject GetCurrentWeaponObject() => currentWeaponObject;
 
-    // --- NEW FUNCTIONALITY ---
-    public void DisableWeaponSwitching(bool value)
-    {
-        disableSwitching = value;
-    }
+    public void DisableWeaponSwitching(bool value) => disableSwitching = value;
 }

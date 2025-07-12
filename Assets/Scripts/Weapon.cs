@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 
 public class Weapon : MonoBehaviour
@@ -40,6 +40,7 @@ public class Weapon : MonoBehaviour
 
     private float nextFireTime = 0f;
     private bool isReloading = false;
+    private Coroutine reloadCoroutine;
 
     public static bool IsScoping = false;
     private WeaponBuildTool buildTool;
@@ -47,8 +48,8 @@ public class Weapon : MonoBehaviour
     [Header("Muzzle Flash")]
     public Light muzzleFlashLight;
     public float flashDuration = 0.05f;
-    public Sprite[] muzzleFlashSprites;     // Your sprite options
-    public SpriteRenderer muzzleFlashRenderer; // Your single flash SpriteRenderer GameObject
+    public Sprite[] muzzleFlashSprites;
+    public SpriteRenderer muzzleFlashRenderer;
 
     [Header("Bullet Tracer")]
     public LineRenderer bulletLinePrefab;
@@ -75,7 +76,8 @@ public class Weapon : MonoBehaviour
         if (muzzleFlashRenderer != null)
             muzzleFlashRenderer.enabled = false;
 
-        currentAmmo = maxAmmo;
+        if (currentAmmo <= 0)
+            currentAmmo = maxAmmo;
     }
 
     void Update()
@@ -113,10 +115,8 @@ public class Weapon : MonoBehaviour
 
         recoilOffset += recoilKick;
 
-        if (shootSound != null && audioSource != null)
-        {
+        if (shootSound != null)
             audioSource.PlayOneShot(shootSound, shootVolume);
-        }
 
         Vector3 hitPoint = Camera.main.transform.position + Camera.main.transform.forward * range;
 
@@ -127,12 +127,10 @@ public class Weapon : MonoBehaviour
 
             Enemy enemy = hit.collider.GetComponent<Enemy>();
             if (enemy != null)
-            {
                 enemy.TakeDamage(damage);
-            }
         }
 
-        Debug.Log(weaponName + " fired! Remaining ammo: " + currentAmmo);
+        Debug.Log($"{weaponName} fired! Remaining ammo: {currentAmmo}");
 
         StartCoroutine(DoMuzzleFlash());
         StartCoroutine(SpawnBulletTracer(muzzlePoint.position, hitPoint));
@@ -140,8 +138,7 @@ public class Weapon : MonoBehaviour
 
     IEnumerator DoMuzzleFlash()
     {
-        if (muzzleFlashLight != null)
-            muzzleFlashLight.enabled = true;
+        if (muzzleFlashLight != null) muzzleFlashLight.enabled = true;
 
         if (muzzleFlashRenderer != null && muzzleFlashSprites.Length > 0)
         {
@@ -151,14 +148,11 @@ public class Weapon : MonoBehaviour
 
         yield return new WaitForSeconds(flashDuration);
 
-        if (muzzleFlashLight != null)
-            muzzleFlashLight.enabled = false;
-
-        if (muzzleFlashRenderer != null)
-            muzzleFlashRenderer.enabled = false;
+        if (muzzleFlashLight != null) muzzleFlashLight.enabled = false;
+        if (muzzleFlashRenderer != null) muzzleFlashRenderer.enabled = false;
     }
 
-    private IEnumerator SpawnBulletTracer(Vector3 start, Vector3 end)
+    IEnumerator SpawnBulletTracer(Vector3 start, Vector3 end)
     {
         LineRenderer line = Instantiate(bulletLinePrefab);
         line.SetPosition(0, start);
@@ -174,26 +168,31 @@ public class Weapon : MonoBehaviour
         if (!isReloading && currentAmmo < maxAmmo)
         {
             isReloading = true;
-            Debug.Log("Reloading " + weaponName + "...");
-            StartCoroutine(ReloadCoroutine());
+            Debug.Log($"Reloading {weaponName}...");
+            reloadCoroutine = StartCoroutine(ReloadCoroutine());
         }
     }
 
-    private IEnumerator ReloadCoroutine()
+    IEnumerator ReloadCoroutine()
     {
         yield return new WaitForSeconds(reloadTime);
         currentAmmo = maxAmmo;
         isReloading = false;
-        Debug.Log(weaponName + " reloaded.");
+        reloadCoroutine = null;
+        Debug.Log($"{weaponName} reloaded.");
     }
 
-    public bool IsReloading()
+    public void CancelReload()
     {
-        return isReloading;
+        if (reloadCoroutine != null)
+        {
+            StopCoroutine(reloadCoroutine);
+            reloadCoroutine = null;
+        }
+        isReloading = false;
     }
 
-    public float GetDamage()
-    {
-        return damage;
-    }
+    public bool IsReloading() => isReloading;
+
+    public float GetDamage() => damage;
 }
