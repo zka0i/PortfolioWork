@@ -392,7 +392,7 @@ MonoBehaviour:
   equipAudioClip: {fileID: 8300000, guid: 1bc048181bd4cec4f81c746544267604, type: 3}
   shootVolume: 0.3
   equipVolume: 0.5
-  muzzleFlashLight: {fileID: 0}
+  muzzleFlashLight: {fileID: 4412819961453634240}
   flashDuration: 0.05
   muzzleFlashSprites:
   - {fileID: 21300000, guid: f1c541ec0edf4d646972445196a79715, type: 3}

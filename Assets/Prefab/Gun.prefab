@@ -235,7 +235,7 @@ MonoBehaviour:
   tracerDuration: 0.05
   animator: {fileID: 5440353112997021620}
   equipTriggerName: Equip
-  equipAnimationTime: 1
+  equipAnimationTime: 0.8
 --- !u!95 &5440353112997021620
 Animator:
   serializedVersion: 5
