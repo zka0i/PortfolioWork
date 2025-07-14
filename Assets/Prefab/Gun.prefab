@@ -96,6 +96,7 @@ GameObject:
   - component: {fileID: 3158246179915850865}
   - component: {fileID: 2635149502447035705}
   - component: {fileID: 5655150006053038245}
+  - component: {fileID: 5440353112997021620}
   m_Layer: 0
   m_Name: Gun
   m_TagString: PrimaryWeapon
@@ -219,9 +220,9 @@ MonoBehaviour:
   scopeSpeed: 10
   zoomFOV: 30
   shootSound: {fileID: 8300000, guid: 8b15aefb7a3a1ee458dbb3527ff87ff8, type: 3}
-  equipSound: {fileID: 8300000, guid: 2c35a25151f39d74e99ecb961aacceea, type: 3}
+  equipAudioClip: {fileID: 8300000, guid: e8a681dab48250c4c8f4c23533a9e168, type: 3}
   shootVolume: 0.3
-  equipVolume: 0.5
+  equipVolume: 0.7
   muzzleFlashLight: {fileID: 2943911460046280968}
   flashDuration: 0.05
   muzzleFlashSprites:
@@ -232,6 +233,30 @@ MonoBehaviour:
   bulletLinePrefab: {fileID: 367755899403657746, guid: af55c9a8b8b45634884c9b4ca1ab79ca, type: 3}
   muzzlePoint: {fileID: 409714719558724619}
   tracerDuration: 0.05
+  animator: {fileID: 5440353112997021620}
+  equipTriggerName: Equip
+  equipAnimationTime: 1
+--- !u!95 &5440353112997021620
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618307770956205519}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: b2884db36d68dd840832a6507e434898, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &943637354834997157
 GameObject:
   m_ObjectHideFlags: 0

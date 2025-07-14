@@ -33,7 +33,7 @@ public class Weapon : MonoBehaviour
 
     [Header("Audio")]
     public AudioClip shootSound;
-    public AudioClip equipSound;
+    public AudioClip equipAudioClip; // ✅ Drag your equip sound here!
     public float shootVolume = 0.6f;
     public float equipVolume = 0.7f;
     private AudioSource audioSource;
@@ -56,6 +56,13 @@ public class Weapon : MonoBehaviour
     public Transform muzzlePoint;
     public float tracerDuration = 0.05f;
 
+    [Header("Equip Animation")]
+    public Animator animator; // ✅ Assign your Animator in Inspector
+    public string equipTriggerName = "Equip";
+    public float equipAnimationTime = 0.5f; // Match this to your GunEquip clip
+
+    private bool isEquipping = false;
+
     void Start()
     {
         originalLocalPos = modelTransform.localPosition;
@@ -65,19 +72,14 @@ public class Weapon : MonoBehaviour
         if (audioSource == null)
             audioSource = gameObject.AddComponent<AudioSource>();
 
-        if (equipSound != null)
-            audioSource.PlayOneShot(equipSound, equipVolume);
-
         buildTool = FindObjectOfType<WeaponBuildTool>();
 
-        if (muzzleFlashLight != null)
-            muzzleFlashLight.enabled = false;
+        if (muzzleFlashLight != null) muzzleFlashLight.enabled = false;
+        if (muzzleFlashRenderer != null) muzzleFlashRenderer.enabled = false;
 
-        if (muzzleFlashRenderer != null)
-            muzzleFlashRenderer.enabled = false;
+        if (currentAmmo <= 0) currentAmmo = maxAmmo;
 
-        if (currentAmmo <= 0)
-            currentAmmo = maxAmmo;
+        PlayEquipAnimation(); // Play equip on spawn
     }
 
     void Update()
@@ -103,7 +105,7 @@ public class Weapon : MonoBehaviour
     public bool CanShoot()
     {
         if (buildTool != null && buildTool.IsBuilding()) return false;
-        return Time.time >= nextFireTime && !isReloading && currentAmmo > 0;
+        return Time.time >= nextFireTime && !isReloading && !isEquipping && currentAmmo > 0;
     }
 
     public void Shoot()
@@ -158,9 +160,12 @@ public class Weapon : MonoBehaviour
         line.SetPosition(0, start);
         line.SetPosition(1, end);
 
+        // ✅ Parent it to this gun so it gets destroyed if you switch weapons
+        line.transform.parent = this.transform;
+
         yield return new WaitForSeconds(tracerDuration);
 
-        Destroy(line.gameObject);
+        if (line != null) Destroy(line.gameObject);
     }
 
     public void Reload()
@@ -195,4 +200,25 @@ public class Weapon : MonoBehaviour
     public bool IsReloading() => isReloading;
 
     public float GetDamage() => damage;
+
+    // ✅ Play equip animation + sound
+    public void PlayEquipAnimation()
+    {
+        CancelReload(); // Cancel reload if switching
+        isEquipping = true;
+
+        if (animator != null)
+            animator.SetTrigger(equipTriggerName);
+
+        if (equipAudioClip != null)
+            audioSource.PlayOneShot(equipAudioClip, equipVolume);
+
+        StartCoroutine(EndEquipAfterDelay());
+    }
+
+    private IEnumerator EndEquipAfterDelay()
+    {
+        yield return new WaitForSeconds(equipAnimationTime);
+        isEquipping = false;
+    }
 }
