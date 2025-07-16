@@ -33,9 +33,11 @@ public class Weapon : MonoBehaviour
 
     [Header("Audio")]
     public AudioClip shootSound;
-    public AudioClip equipAudioClip; // ✅ Drag your equip sound here!
+    public AudioClip equipAudioClip;
+    public AudioClip reloadAudioClip;  // ✅ Drag your reload sound here!
     public float shootVolume = 0.6f;
     public float equipVolume = 0.7f;
+    public float reloadVolume = 0.7f;  // ✅ Adjust as you like
     private AudioSource audioSource;
 
     private float nextFireTime = 0f;
@@ -57,9 +59,13 @@ public class Weapon : MonoBehaviour
     public float tracerDuration = 0.05f;
 
     [Header("Equip Animation")]
-    public Animator animator; // ✅ Assign your Animator in Inspector
+    public Animator animator;
     public string equipTriggerName = "Equip";
-    public float equipAnimationTime = 0.5f; // Match this to your GunEquip clip
+    public float equipAnimationTime = 0.5f;
+
+    [Header("Reload Animation")]
+    public string reloadTriggerName = "Reload";  // ✅ Your reload trigger name
+    public float reloadAnimationTime = 1.5f;     // ✅ Match this to your reload clip
 
     private bool isEquipping = false;
 
@@ -79,7 +85,7 @@ public class Weapon : MonoBehaviour
 
         if (currentAmmo <= 0) currentAmmo = maxAmmo;
 
-        PlayEquipAnimation(); // Play equip on spawn
+        PlayEquipAnimation();
     }
 
     void Update()
@@ -160,7 +166,6 @@ public class Weapon : MonoBehaviour
         line.SetPosition(0, start);
         line.SetPosition(1, end);
 
-        // ✅ Parent it to this gun so it gets destroyed if you switch weapons
         line.transform.parent = this.transform;
 
         yield return new WaitForSeconds(tracerDuration);
@@ -174,16 +179,27 @@ public class Weapon : MonoBehaviour
         {
             isReloading = true;
             Debug.Log($"Reloading {weaponName}...");
+
+            // ✅ Trigger reload animation
+            if (animator != null)
+                animator.SetTrigger(reloadTriggerName);
+
+            // ✅ Play reload sound
+            if (reloadAudioClip != null)
+                audioSource.PlayOneShot(reloadAudioClip, reloadVolume);
+
             reloadCoroutine = StartCoroutine(ReloadCoroutine());
         }
     }
 
     IEnumerator ReloadCoroutine()
     {
-        yield return new WaitForSeconds(reloadTime);
+        yield return new WaitForSeconds(reloadAnimationTime);
+
         currentAmmo = maxAmmo;
         isReloading = false;
         reloadCoroutine = null;
+
         Debug.Log($"{weaponName} reloaded.");
     }
 
@@ -201,10 +217,9 @@ public class Weapon : MonoBehaviour
 
     public float GetDamage() => damage;
 
-    // ✅ Play equip animation + sound
     public void PlayEquipAnimation()
     {
-        CancelReload(); // Cancel reload if switching
+        CancelReload();
         isEquipping = true;
 
         if (animator != null)

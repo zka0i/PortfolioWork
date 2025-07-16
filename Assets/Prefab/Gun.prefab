@@ -221,8 +221,10 @@ MonoBehaviour:
   zoomFOV: 30
   shootSound: {fileID: 8300000, guid: 8b15aefb7a3a1ee458dbb3527ff87ff8, type: 3}
   equipAudioClip: {fileID: 8300000, guid: e8a681dab48250c4c8f4c23533a9e168, type: 3}
+  reloadAudioClip: {fileID: 8300000, guid: 884fc33035b5a104fbb1af362e070a43, type: 3}
   shootVolume: 0.3
   equipVolume: 0.7
+  reloadVolume: 0.7
   muzzleFlashLight: {fileID: 2943911460046280968}
   flashDuration: 0.05
   muzzleFlashSprites:
@@ -236,6 +238,8 @@ MonoBehaviour:
   animator: {fileID: 5440353112997021620}
   equipTriggerName: Equip
   equipAnimationTime: 0.8
+  reloadTriggerName: Reload
+  reloadAnimationTime: 1.5
 --- !u!95 &5440353112997021620
 Animator:
   serializedVersion: 5

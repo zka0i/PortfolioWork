@@ -98,6 +98,7 @@ public class WeaponBuildTool : MonoBehaviour
         if (weaponManager != null && weaponManager.GetCurrentWeaponObject() != null)
         {
             weaponManager.GetCurrentWeaponObject().SetActive(true);
+            weaponManager.GetCurrentWeapon().PlayEquipAnimation(); // ✅ NEW: Play equip anim on return!
             weaponManager.DisableWeaponSwitching(false);
         }
 
@@ -171,7 +172,6 @@ public class WeaponBuildTool : MonoBehaviour
 
         Debug.Log($"🔨 Placed: {buildPrefabs[currentBuildIndex].name}, Remaining: {buildPlacements[currentBuildIndex]}");
 
-        // ✅ DON’T exit build mode automatically — just destroy preview if none left
         if (buildPlacements[currentBuildIndex] <= 0)
         {
             DestroyPreview();
