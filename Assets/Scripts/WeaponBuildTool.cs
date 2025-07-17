@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections.Generic;
 
 public class WeaponBuildTool : MonoBehaviour
@@ -20,6 +21,12 @@ public class WeaponBuildTool : MonoBehaviour
     [Header("Weapon Manager")]
     public WeaponManager weaponManager;
 
+    [Header("Build Delay Settings")]
+    public float buildHoldDuration = 2f;
+    public Slider buildProgressSlider;
+    private float buildHoldTimer = 0f;
+    private bool isHoldingToBuild = false;
+
     private int currentBuildIndex = 0;
     private GameObject currentPreview;
     private bool isBuilding = false;
@@ -38,6 +45,13 @@ public class WeaponBuildTool : MonoBehaviour
         for (int i = 0; i < buildPrefabs.Length; i++)
         {
             buildPlacements[i] = 0;
+        }
+
+        if (buildProgressSlider != null)
+        {
+            buildProgressSlider.gameObject.SetActive(false);
+            buildProgressSlider.minValue = 0;
+            buildProgressSlider.maxValue = buildHoldDuration;
         }
     }
 
@@ -70,8 +84,47 @@ public class WeaponBuildTool : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0) && buildPlacements[currentBuildIndex] > 0)
         {
-            PlaceObject();
+            StartHoldingToPlace();
         }
+
+        if (Input.GetMouseButton(0) && isHoldingToBuild)
+        {
+            buildHoldTimer += Time.deltaTime;
+            if (buildProgressSlider != null)
+                buildProgressSlider.value = buildHoldTimer;
+
+            if (buildHoldTimer >= buildHoldDuration)
+            {
+                PlaceObject();
+                StopHoldingToPlace();
+            }
+        }
+
+        if (Input.GetMouseButtonUp(0))
+        {
+            StopHoldingToPlace();
+        }
+    }
+
+    void StartHoldingToPlace()
+    {
+        isHoldingToBuild = true;
+        buildHoldTimer = 0f;
+
+        if (buildProgressSlider != null)
+        {
+            buildProgressSlider.value = 0;
+            buildProgressSlider.gameObject.SetActive(true);
+        }
+    }
+
+    void StopHoldingToPlace()
+    {
+        isHoldingToBuild = false;
+        buildHoldTimer = 0f;
+
+        if (buildProgressSlider != null)
+            buildProgressSlider.gameObject.SetActive(false);
     }
 
     void EnterBuildMode()
@@ -106,6 +159,7 @@ public class WeaponBuildTool : MonoBehaviour
             Destroy(hammerHandInstance);
 
         DestroyPreview();
+        StopHoldingToPlace(); // Clean up hold state if exiting early
     }
 
     void SwitchPreview()
