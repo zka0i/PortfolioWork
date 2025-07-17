@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4588959435361326870}
   - component: {fileID: 7666612645261971168}
+  - component: {fileID: 1539606461466846075}
   m_Layer: 0
   m_Name: GroundBarbwire
   m_TagString: Untagged
@@ -52,6 +53,28 @@ MonoBehaviour:
   buildTool: {fileID: 0}
   interactRange: 3
   pickupSound: {fileID: 8300000, guid: a434b692d9a6821459908b659fb67e56, type: 3}
+  pickupVolume: 1
+--- !u!65 &1539606461466846075
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2325466015490779584}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 2.15374, y: 0.51157033, z: 2.0360649}
+  m_Center: {x: 0.14084578, y: -0.014848616, z: -0.088890195}
 --- !u!1001 &423327737475373467
 PrefabInstance:
   m_ObjectHideFlags: 0
