@@ -10,6 +10,7 @@ public class EnemyAI : MonoBehaviour
 
     public Transform player;
     public Generator generator;
+    public GameObject destroyedGeneratorPrefab; // Prefab to spawn after destruction
 
     private NavMeshAgent agent;
     private Enemy enemyScript;
@@ -40,11 +41,26 @@ public class EnemyAI : MonoBehaviour
 
         if (playerInSight)
         {
+            agent.stoppingDistance = attackRange;
+            agent.isStopped = false;
             agent.SetDestination(player.position);
         }
         else
         {
-            agent.SetDestination(generator.transform.position);
+            agent.stoppingDistance = attackRange;
+
+            float generatorDist = Vector3.Distance(transform.position, generator.transform.position);
+
+            // Stop moving if close enough to prevent clipping
+            if (generatorDist <= attackRange + 0.5f)
+            {
+                agent.isStopped = true;
+            }
+            else
+            {
+                agent.isStopped = false;
+                agent.SetDestination(generator.transform.position);
+            }
         }
 
         HandleAttack();
@@ -52,15 +68,25 @@ public class EnemyAI : MonoBehaviour
 
     void HandleAttack()
     {
-        if (playerStats == null) return;
+        if (Time.time < lastDamageTime + damageInterval) return;
 
-        float distance = Vector3.Distance(transform.position, player.position);
-        if (distance <= attackRange)
+        float playerDist = Vector3.Distance(transform.position, player.position);
+        float generatorDist = Vector3.Distance(transform.position, generator.transform.position);
+
+        if (playerStats != null && playerDist <= attackRange && PlayerInSight())
         {
-            if (Time.time >= lastDamageTime + damageInterval)
+            playerStats.TakeDamage(damage);
+            lastDamageTime = Time.time;
+        }
+        else if (generatorDist <= attackRange && !PlayerInSight())
+        {
+            generator.TakeDamage(damage);
+            lastDamageTime = Time.time;
+
+            if (generator.CurrentHealth <= 0 && destroyedGeneratorPrefab != null)
             {
-                playerStats.TakeDamage(damage);
-                lastDamageTime = Time.time;
+                Instantiate(destroyedGeneratorPrefab, generator.transform.position, generator.transform.rotation);
+                Destroy(generator.gameObject);
             }
         }
     }

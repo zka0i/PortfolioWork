@@ -1,10 +1,22 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Generator : MonoBehaviour
 {
-    [Header("Generator Stats")]
-    public float maxHealth = 200f;
+    [Header("Health Settings")]
+    public float maxHealth = 100f;
     private float currentHealth;
+
+    [Header("Damage Settings")]
+    public float damageInterval = 1f;
+    public float damagePerTick = 5f;
+
+    [Header("Replacement")]
+    public GameObject destroyedPrefab;
+
+    private float lastDamageTime;
+
+    // ✅ Public read-only access for other scripts
+    public float CurrentHealth => currentHealth;
 
     void Start()
     {
@@ -14,9 +26,6 @@ public class Generator : MonoBehaviour
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
-        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
-        Debug.Log("? Generator took damage: " + amount);
-
         if (currentHealth <= 0)
         {
             Die();
@@ -25,7 +34,10 @@ public class Generator : MonoBehaviour
 
     void Die()
     {
-        Debug.Log("?? Generator destroyed!");
-        // Optional: Trigger fail state or shutdown
+        if (destroyedPrefab != null)
+        {
+            Instantiate(destroyedPrefab, transform.position, transform.rotation);
+        }
+        Destroy(gameObject);
     }
 }
