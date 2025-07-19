@@ -466,7 +466,7 @@ MonoBehaviour:
   weaponPrefabs:
   - {fileID: 618307770956205519, guid: 5608389139dfff646a251f3dd52aea3e, type: 3}
   - {fileID: 4711539559499847094, guid: 919d1cab0ca00f646918c4c1515a66a1, type: 3}
-  audioSource: {fileID: 0}
+  audioSource: {fileID: 3022731774660924066}
   equipSounds: []
   equipVolume: 0.5
 --- !u!114 &8211727520061799843
@@ -603,5 +603,5 @@ MonoBehaviour:
   placeVolume: 1
   hammerHandPrefab: {fileID: 5268158264737084253, guid: 10a4f14234f3639468be12e70a49e5a2, type: 3}
   weaponManager: {fileID: 8623263594986219042}
-  buildHoldDuration: 1
+  buildHoldDuration: 0.5
   buildProgressSlider: {fileID: 0}

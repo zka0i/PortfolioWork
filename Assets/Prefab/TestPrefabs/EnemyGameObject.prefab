@@ -51,7 +51,7 @@ MonoBehaviour:
   damageAmount: 50
   damageInterval: 1
   lastDamageTime: 0
-  audioSource: {fileID: 0}
+  audioSource: {fileID: 3022731774660924066, guid: a95f5a71ce7f88f4a996fdaeb5e162f3, type: 3}
   headshotSound: {fileID: 8300000, guid: b002ad4064466194cbac0ead4ea0ec6c, type: 3}
   bodyHitSound: {fileID: 8300000, guid: 010aceda8962fe943a5eb826efd35da8, type: 3}
 --- !u!54 &2075631877837221896
@@ -115,6 +115,8 @@ GameObject:
   - component: {fileID: 7295506454999655608}
   - component: {fileID: 6025313460636046518}
   - component: {fileID: 5942994022404134976}
+  - component: {fileID: 5782719869981414347}
+  - component: {fileID: 3192244893926143243}
   m_Layer: 0
   m_Name: Dummy
   m_TagString: Body
@@ -188,6 +190,47 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!195 &5782719869981414347
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4820093087600843549}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 1
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!114 &3192244893926143243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4820093087600843549}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5920046b1a91726428e8e3d5f1f92bf4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  detectionRadius: 15
+  attackRange: 2
+  damage: 10
+  damageInterval: 1
+  player: {fileID: 0}
+  generator: {fileID: 0}
+  destroyedGeneratorPrefab: {fileID: 0}
 --- !u!1 &5096142645997272275
 GameObject:
   m_ObjectHideFlags: 0
