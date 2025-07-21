@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
@@ -40,6 +40,7 @@ public class EnemySpawner : MonoBehaviour
             if (timer <= 0)
             {
                 spawningStopped = true;
+                timerText.gameObject.SetActive(false); // ✅ Hide timer UI when finished
                 ShowRemainingEnemiesUI();
                 return;
             }
@@ -74,13 +75,19 @@ public class EnemySpawner : MonoBehaviour
         Transform spawnPoint = spawnPoints[currentSpawnIndex];
         GameObject enemy = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
 
-        // Ensure AudioSource is enabled
+        // ✅ Ensure AudioSource exists and is enabled
         AudioSource audio = enemy.GetComponent<AudioSource>();
-        if (audio != null && !audio.enabled)
+        if (audio == null)
+        {
+            audio = enemy.AddComponent<AudioSource>();
+            audio.playOnAwake = false;
+        }
+        else if (!audio.enabled)
+        {
             audio.enabled = true;
+        }
 
         activeEnemies.Add(enemy);
-
         currentSpawnIndex = (currentSpawnIndex + 1) % spawnPoints.Count;
     }
 

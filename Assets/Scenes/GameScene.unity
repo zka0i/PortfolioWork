@@ -593,7 +593,7 @@ MonoBehaviour:
   - {fileID: 1293547179}
   - {fileID: 1715588287}
   spawnInterval: 2
-  spawnDuration: 20
+  spawnDuration: 5
   timerText: {fileID: 978966156}
   remainingEnemiesText: {fileID: 1991831588}
 --- !u!4 &835651983
@@ -872,12 +872,20 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2086032313920646872, guid: 448776ef8b1a8bf4ea8367a58031ef1d, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3192244893926143243, guid: 448776ef8b1a8bf4ea8367a58031ef1d, type: 3}
       propertyPath: player
       value: 
       objectReference: {fileID: 1992521844}
+    - target: {fileID: 3192244893926143243, guid: 448776ef8b1a8bf4ea8367a58031ef1d, type: 3}
+      propertyPath: generator
+      value: 
+      objectReference: {fileID: 950887122}
+    - target: {fileID: 3192244893926143243, guid: 448776ef8b1a8bf4ea8367a58031ef1d, type: 3}
+      propertyPath: destroyedGeneratorPrefab
+      value: 
+      objectReference: {fileID: 950887114}
     - target: {fileID: 7078624368968895966, guid: 448776ef8b1a8bf4ea8367a58031ef1d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 80.09
@@ -1255,10 +1263,10 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 14
+    m_FontSize: 13
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 10
+    m_MinSize: 1
     m_MaxSize: 40
     m_Alignment: 1
     m_AlignByGeometry: 0
@@ -1266,7 +1274,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Timer
+  m_Text: 'Timer
+
+'
 --- !u!222 &1991831589
 CanvasRenderer:
   m_ObjectHideFlags: 0
