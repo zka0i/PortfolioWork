@@ -14,17 +14,24 @@ public class Generator : MonoBehaviour
     public GameObject destroyedPrefab;
 
     private float lastDamageTime;
+    private bool isDestroyed = false;
 
     // ✅ Public read-only access for other scripts
     public float CurrentHealth => currentHealth;
 
+    // ✅ Public property to check if the generator is destroyed
+    public bool IsDestroyed => isDestroyed;
+
     void Start()
     {
         currentHealth = maxHealth;
+        isDestroyed = false;
     }
 
     public void TakeDamage(float amount)
     {
+        if (isDestroyed) return;
+
         currentHealth -= amount;
         if (currentHealth <= 0)
         {
@@ -34,10 +41,15 @@ public class Generator : MonoBehaviour
 
     void Die()
     {
+        if (isDestroyed) return;
+
+        isDestroyed = true;
+
         if (destroyedPrefab != null)
         {
             Instantiate(destroyedPrefab, transform.position, transform.rotation);
         }
+
         Destroy(gameObject);
     }
 }

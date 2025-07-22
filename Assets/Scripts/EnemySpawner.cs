@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 using System.Collections.Generic;
 
 public class EnemySpawner : MonoBehaviour
@@ -10,24 +11,29 @@ public class EnemySpawner : MonoBehaviour
     public float spawnInterval = 2f;
 
     [Header("Timer Settings")]
-    public float spawnDuration = 180f; // 3 mins
+    public float spawnDuration = 180f;
     public Text timerText;
     public Text remainingEnemiesText;
 
-    private float timer;
-    private bool spawningStopped = false;
-    private float spawnCooldown = 0f;
+    [Header("Night Transition UI")]
+    public GameObject nightTransitionUI;
+    public Text nightText;
+    public Image nightBackground;
 
+    [HideInInspector] public float timer;
+    [HideInInspector] public bool spawningStopped = true;
+
+    private float spawnCooldown = 0f;
     private List<GameObject> activeEnemies = new List<GameObject>();
     private int currentSpawnIndex = 0;
+
+    public bool AllEnemiesDefeated => spawningStopped && activeEnemies.Count == 0;
 
     void Start()
     {
         timer = spawnDuration;
         UpdateTimerUI();
-
-        if (remainingEnemiesText != null)
-            remainingEnemiesText.gameObject.SetActive(false);
+        remainingEnemiesText?.gameObject.SetActive(false);
     }
 
     void Update()
@@ -40,12 +46,11 @@ public class EnemySpawner : MonoBehaviour
             if (timer <= 0)
             {
                 spawningStopped = true;
-                timerText.gameObject.SetActive(false); // ✅ Hide timer UI when finished
+                timerText?.gameObject.SetActive(false);
                 ShowRemainingEnemiesUI();
                 return;
             }
 
-            // Spawning logic
             if (Time.time >= spawnCooldown)
             {
                 SpawnEnemy();
@@ -53,18 +58,18 @@ public class EnemySpawner : MonoBehaviour
             }
         }
 
-        // Cleanup dead enemies
         activeEnemies.RemoveAll(enemy => enemy == null);
 
-        if (spawningStopped && activeEnemies.Count == 0)
+        if (spawningStopped)
         {
-            if (remainingEnemiesText != null)
+            if (AllEnemiesDefeated)
+            {
                 remainingEnemiesText.text = "All enemies defeated!";
-            Debug.Log("All enemies defeated!");
-        }
-        else if (spawningStopped)
-        {
-            UpdateRemainingUI();
+            }
+            else
+            {
+                UpdateRemainingUI();
+            }
         }
     }
 
@@ -75,16 +80,11 @@ public class EnemySpawner : MonoBehaviour
         Transform spawnPoint = spawnPoints[currentSpawnIndex];
         GameObject enemy = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
 
-        // ✅ Ensure AudioSource exists and is enabled
         AudioSource audio = enemy.GetComponent<AudioSource>();
         if (audio == null)
         {
             audio = enemy.AddComponent<AudioSource>();
             audio.playOnAwake = false;
-        }
-        else if (!audio.enabled)
-        {
-            audio.enabled = true;
         }
 
         activeEnemies.Add(enemy);
@@ -97,7 +97,7 @@ public class EnemySpawner : MonoBehaviour
 
         int minutes = Mathf.FloorToInt(timer / 60);
         int seconds = Mathf.FloorToInt(timer % 60);
-        timerText.text = string.Format("Time Left: {0:00}:{1:00}", minutes, seconds);
+        timerText.text = $"Time Left: {minutes:00}:{seconds:00}";
     }
 
     void ShowRemainingEnemiesUI()
@@ -115,5 +115,68 @@ public class EnemySpawner : MonoBehaviour
         {
             remainingEnemiesText.text = $"Kill the remaining:\n{activeEnemies.Count}";
         }
+    }
+
+    public bool TimerExpired()
+    {
+        return timer <= 0;
+    }
+
+    public void BeginSpawning()
+    {
+        timer = spawnDuration;
+        spawningStopped = false;
+        timerText?.gameObject.SetActive(true);
+        remainingEnemiesText?.gameObject.SetActive(false);
+    }
+
+    public void ResetSpawner()
+    {
+        timer = spawnDuration;
+        spawnCooldown = 0f;
+        spawningStopped = true;
+
+        foreach (GameObject enemy in activeEnemies)
+        {
+            if (enemy != null)
+                Destroy(enemy);
+        }
+        activeEnemies.Clear();
+
+        timerText?.gameObject.SetActive(false);
+        remainingEnemiesText?.gameObject.SetActive(false);
+    }
+
+    // ✅ FIXED: Now takes night number and shows fade transition
+    public void StartNewNight(int nightNumber)
+    {
+        StartCoroutine(StartNightTransition(nightNumber));
+    }
+
+    IEnumerator StartNightTransition(int nightNumber)
+    {
+        if (nightTransitionUI != null && nightText != null && nightBackground != null)
+        {
+            nightText.text = $"Night {nightNumber}";
+            nightTransitionUI.SetActive(true);
+            nightBackground.color = new Color(0f, 0f, 0f, 0.7f); // semi-transparent black
+
+            // Fade out effect
+            float duration = 2f;
+            float t = 0f;
+            Color initialColor = nightBackground.color;
+
+            while (t < duration)
+            {
+                t += Time.deltaTime;
+                float alpha = Mathf.Lerp(0.7f, 0f, t / duration);
+                nightBackground.color = new Color(0f, 0f, 0f, alpha);
+                yield return null;
+            }
+
+            nightTransitionUI.SetActive(false);
+        }
+
+        BeginSpawning();
     }
 }
