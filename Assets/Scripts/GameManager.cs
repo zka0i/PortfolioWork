@@ -12,14 +12,24 @@ public class GameManager : MonoBehaviour
     public GameObject loseScreen;
     public Image backgroundFadeImage;
     public TextMeshProUGUI nightText;
+    public TextMeshProUGUI intermissionText;
 
     [Header("Fade Settings")]
     public float fadeDuration = 2f;
     public float displayTime = 2f;
 
+    [Header("Intermission Settings")]
+    public float intermissionDuration = 10f;
+
+    [Header("Audio")]
+    public AudioSource nightStartAudioSource;
+    public AudioClip nightStartClip;
+
     [Header("References")]
     public EnemySpawner enemySpawner;
     public Generator generator;
+    public PlayerMovement playerMovement;
+    public Weapon weapon;
 
     private bool gameEnded = false;
     private bool fading = false;
@@ -29,6 +39,9 @@ public class GameManager : MonoBehaviour
 
     private int currentNight = 1;
     private const int maxNights = 12;
+
+    private bool isIntermission = false;
+    private float intermissionTimer = 0f;
 
     void Awake()
     {
@@ -42,6 +55,7 @@ public class GameManager : MonoBehaviour
     {
         winScreen.SetActive(false);
         loseScreen.SetActive(false);
+        if (intermissionText != null) intermissionText.gameObject.SetActive(false);
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -59,17 +73,47 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        if (isIntermission)
+        {
+            intermissionTimer -= Time.deltaTime;
+
+            if (intermissionText != null)
+            {
+                intermissionText.gameObject.SetActive(true);
+                intermissionText.text = $"Intermission: {Mathf.CeilToInt(intermissionTimer)}s";
+            }
+
+            if (intermissionTimer <= 0f)
+            {
+                isIntermission = false;
+                if (intermissionText != null) intermissionText.gameObject.SetActive(false);
+
+                if (currentNight < maxNights)
+                {
+                    currentNight++;
+                    StartNight(currentNight);
+                }
+                else
+                {
+                    ShowWinScreen();
+                }
+            }
+
+            return;
+        }
+
         if (enemySpawner.TimerExpired() && enemySpawner.AllEnemiesDefeated)
         {
-            if (currentNight < maxNights)
+            isIntermission = true;
+            intermissionTimer = intermissionDuration;
+
+            if (intermissionText != null)
             {
-                currentNight++;
-                StartNight(currentNight);
+                intermissionText.gameObject.SetActive(true);
+                intermissionText.text = $"Intermission: {Mathf.CeilToInt(intermissionTimer)}s";
             }
-            else
-            {
-                ShowWinScreen();
-            }
+
+            Debug.Log("Intermission started.");
         }
 
         HandleNightFade();
@@ -77,16 +121,23 @@ public class GameManager : MonoBehaviour
 
     void StartNight(int nightNumber)
     {
-        // Reset and spawn new wave
         enemySpawner.StartNewNight(nightNumber);
 
-        // Show fade background and text
+        TogglePlayerControl(false); // disable movement & weapon, allow look around
+
+        // Play night start sound
+        if (nightStartAudioSource != null && nightStartClip != null)
+        {
+            nightStartAudioSource.clip = nightStartClip;
+            nightStartAudioSource.Play();
+        }
+
         if (backgroundFadeImage != null && nightText != null)
         {
             backgroundFadeImage.gameObject.SetActive(true);
             nightText.gameObject.SetActive(true);
 
-            SetAlpha(backgroundFadeImage, 0f);
+            SetAlpha(backgroundFadeImage, 0.6f);
             SetAlpha(nightText, 0f);
 
             nightText.text = $"Night {nightNumber}";
@@ -107,7 +158,7 @@ public class GameManager : MonoBehaviour
             case FadeState.FadeIn:
                 {
                     float t = Mathf.Clamp01(fadeTimer / fadeDuration);
-                    SetAlpha(backgroundFadeImage, Mathf.Lerp(0f, 0.9f, t));
+                    SetAlpha(backgroundFadeImage, Mathf.Lerp(0.6f, 0.9f, t));
                     SetAlpha(nightText, Mathf.Lerp(0f, 1f, t));
 
                     if (t >= 1f)
@@ -129,7 +180,7 @@ public class GameManager : MonoBehaviour
             case FadeState.FadeOut:
                 {
                     float t = Mathf.Clamp01(fadeTimer / fadeDuration);
-                    SetAlpha(backgroundFadeImage, Mathf.Lerp(0.9f, 0f, t));
+                    SetAlpha(backgroundFadeImage, Mathf.Lerp(0.6f, 0f, t));
                     SetAlpha(nightText, Mathf.Lerp(1f, 0f, t));
 
                     if (t >= 1f)
@@ -138,6 +189,8 @@ public class GameManager : MonoBehaviour
                         nightText.gameObject.SetActive(false);
                         fading = false;
                         fadeState = FadeState.None;
+
+                        TogglePlayerControl(true); // re-enable movement and weapon
                     }
                     break;
                 }
@@ -178,5 +231,16 @@ public class GameManager : MonoBehaviour
     public void QuitGame()
     {
         Application.Quit();
+    }
+
+    void TogglePlayerControl(bool enableMovement)
+    {
+        if (playerMovement != null)
+            playerMovement.enabled = enableMovement;
+
+        if (weapon != null)
+            weapon.enabled = enableMovement;
+
+        // Don't touch camera control – player can always look around
     }
 }
