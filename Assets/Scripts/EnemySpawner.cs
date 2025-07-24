@@ -10,6 +10,10 @@ public class EnemySpawner : MonoBehaviour
     public List<Transform> spawnPoints = new List<Transform>();
     public float spawnInterval = 2f;
 
+    [Header("Scaling")]
+    [HideInInspector] public float spawnRateMultiplier = 1f;
+    [HideInInspector] public float enemySpeedMultiplier = 1f;
+
     [Header("Timer Settings")]
     public float spawnDuration = 180f;
     public Text timerText;
@@ -54,7 +58,7 @@ public class EnemySpawner : MonoBehaviour
             if (Time.time >= spawnCooldown)
             {
                 SpawnEnemy();
-                spawnCooldown = Time.time + spawnInterval;
+                spawnCooldown = Time.time + (spawnInterval / Mathf.Max(0.1f, spawnRateMultiplier));
             }
         }
 
@@ -80,6 +84,14 @@ public class EnemySpawner : MonoBehaviour
         Transform spawnPoint = spawnPoints[currentSpawnIndex];
         GameObject enemy = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
 
+        // Apply speed multiplier if enemy has EnemyMovement component
+        EnemyMovement movement = enemy.GetComponent<EnemyMovement>();
+        if (movement != null)
+        {
+            movement.ApplySpeedMultiplier(enemySpeedMultiplier);
+        }
+
+        // Ensure audio
         AudioSource audio = enemy.GetComponent<AudioSource>();
         if (audio == null)
         {
@@ -147,7 +159,6 @@ public class EnemySpawner : MonoBehaviour
         remainingEnemiesText?.gameObject.SetActive(false);
     }
 
-    // ✅ FIXED: Now takes night number and shows fade transition
     public void StartNewNight(int nightNumber)
     {
         StartCoroutine(StartNightTransition(nightNumber));
@@ -161,7 +172,6 @@ public class EnemySpawner : MonoBehaviour
             nightTransitionUI.SetActive(true);
             nightBackground.color = new Color(0f, 0f, 0f, 0.7f); // semi-transparent black
 
-            // Fade out effect
             float duration = 2f;
             float t = 0f;
             Color initialColor = nightBackground.color;
@@ -178,5 +188,11 @@ public class EnemySpawner : MonoBehaviour
         }
 
         BeginSpawning();
+    }
+
+    public void StopSpawning()
+    {
+        spawningStopped = true;
+        timerText?.gameObject.SetActive(false);
     }
 }
