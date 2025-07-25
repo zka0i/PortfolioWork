@@ -17,14 +17,19 @@ public class Enemy : MonoBehaviour
     public AudioClip headshotSound;
     public AudioClip bodyHitSound;
 
+    private EnemyMovement enemyMovement;
+
     void Awake()
     {
-        // Auto-assign self to all child hitboxes
+        // Assign this Enemy to all child hitboxes
         EnemyHitbox[] hitboxes = GetComponentsInChildren<EnemyHitbox>();
         foreach (EnemyHitbox hb in hitboxes)
         {
             hb.enemy = this;
         }
+
+        // Get movement reference
+        enemyMovement = GetComponent<EnemyMovement>();
     }
 
     void Start()
@@ -41,6 +46,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    // 🔫 Normal damage from bullets (plays sound)
     public void TakeDamage(float amount, bool isHeadshot = false)
     {
         if (isDying) return;
@@ -52,7 +58,8 @@ public class Enemy : MonoBehaviour
 
         Debug.Log("☠️ Enemy took damage: " + amount + (isHeadshot ? " (HEAD)" : " (BODY)"));
 
-        if (audioSource != null)
+        // Only play sound for gun damage
+        if (audioSource != null && !isDying)
         {
             if (isHeadshot && willDie && headshotSound != null)
             {
@@ -68,31 +75,60 @@ public class Enemy : MonoBehaviour
 
         if (currentHealth <= 0f)
         {
-            isDying = true;
+            Die(isHeadshot);
+        }
+    }
 
-            // Disable collider
-            Collider col = GetComponent<Collider>();
-            if (col != null) col.enabled = false;
+    // ⚠️ Silent damage (e.g., from barbed wire) — NO audio
+    public void TakeDamage(float amount)
+    {
+        if (isDying) return;
 
-            // Disable all renderers
-            Renderer[] renderers = GetComponentsInChildren<Renderer>();
-            foreach (Renderer r in renderers)
-                r.enabled = false;
+        currentHealth -= amount;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
-            // Optional: disable movement or AI scripts here if needed
+        Debug.Log("☠️ Trap damaged enemy silently: " + amount);
 
-            float destroyDelay = 0f;
+        if (currentHealth <= 0f)
+        {
+            Die(false);
+        }
+    }
 
-            if (isHeadshot && headshotSound != null)
-            {
-                destroyDelay = headshotSound.length;
-            }
-            else if (bodyHitSound != null)
-            {
-                destroyDelay = bodyHitSound.length;
-            }
+    // 🧠 Common death logic
+    private void Die(bool isHeadshot)
+    {
+        isDying = true;
 
-            Destroy(gameObject, destroyDelay);
+        // Disable collider
+        Collider col = GetComponent<Collider>();
+        if (col != null) col.enabled = false;
+
+        // Hide all renderers
+        Renderer[] renderers = GetComponentsInChildren<Renderer>();
+        foreach (Renderer r in renderers)
+            r.enabled = false;
+
+        float destroyDelay = 0f;
+
+        if (isHeadshot && headshotSound != null)
+        {
+            destroyDelay = headshotSound.length;
+        }
+        else if (bodyHitSound != null)
+        {
+            destroyDelay = bodyHitSound.length;
+        }
+
+        Destroy(gameObject, destroyDelay);
+    }
+
+    // 🐌 Barbed wire slows the enemy
+    public void ApplySpeedMultiplier(float multiplier)
+    {
+        if (enemyMovement != null)
+        {
+            enemyMovement.ApplySpeedMultiplier(multiplier);
         }
     }
 }
