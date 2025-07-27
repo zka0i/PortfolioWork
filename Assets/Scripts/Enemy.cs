@@ -131,4 +131,16 @@ public class Enemy : MonoBehaviour
             enemyMovement.ApplySpeedMultiplier(multiplier);
         }
     }
+
+    // ✅ Public method so other scripts (like movement) can know if enemy is dead
+    public bool IsDead()
+    {
+        return isDying;
+    }
+
+    // ✅ Needed by EnemyMovement and others to check if enemy is dying
+    public bool IsDying()
+    {
+        return isDying;
+    }
 }

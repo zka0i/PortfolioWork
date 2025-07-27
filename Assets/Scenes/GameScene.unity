@@ -1182,6 +1182,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 162787460735105218, guid: 448776ef8b1a8bf4ea8367a58031ef1d, type: 3}
+      propertyPath: slowResetTime
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 449594088948774464, guid: 448776ef8b1a8bf4ea8367a58031ef1d, type: 3}
       propertyPath: audioSource
       value: 
@@ -1249,10 +1253,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4820093087600843549, guid: 448776ef8b1a8bf4ea8367a58031ef1d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1854318233}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 448776ef8b1a8bf4ea8367a58031ef1d, type: 3}
 --- !u!114 &1512776742 stripped
 MonoBehaviour:
@@ -1424,7 +1425,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 25701662413203276, guid: 392add6665d09384da940059d56abfca, type: 3}
       propertyPath: damagePerSecond
-      value: 5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5843078306653376258, guid: 392add6665d09384da940059d56abfca, type: 3}
       propertyPath: m_Name
@@ -1439,8 +1440,12 @@ PrefabInstance:
       value: 4.057758
       objectReference: {fileID: 0}
     - target: {fileID: 6511387503758267832, guid: 392add6665d09384da940059d56abfca, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 2.134307
+      objectReference: {fileID: 0}
+    - target: {fileID: 6511387503758267832, guid: 392add6665d09384da940059d56abfca, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 58.43
+      value: 59.6
       objectReference: {fileID: 0}
     - target: {fileID: 6511387503758267832, guid: 392add6665d09384da940059d56abfca, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1448,7 +1453,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6511387503758267832, guid: 392add6665d09384da940059d56abfca, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 11.46
+      value: 11.4
       objectReference: {fileID: 0}
     - target: {fileID: 6511387503758267832, guid: 392add6665d09384da940059d56abfca, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1589,23 +1594,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1726619023}
   m_CullTransparentMesh: 1
---- !u!1 &1854318225 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4820093087600843549, guid: 448776ef8b1a8bf4ea8367a58031ef1d, type: 3}
-  m_PrefabInstance: {fileID: 1432750701}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1854318233
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1854318225}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 63c4bd1f777a91348b0ca5179a20b1b1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1870476653 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6076233827463708379, guid: 7801d50fba4bef0449adeca940027e1c, type: 3}
