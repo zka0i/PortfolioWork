@@ -1421,11 +1421,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 25701662413203276, guid: 392add6665d09384da940059d56abfca, type: 3}
       propertyPath: slowMultiplier
-      value: 1000
+      value: 10000000
       objectReference: {fileID: 0}
     - target: {fileID: 25701662413203276, guid: 392add6665d09384da940059d56abfca, type: 3}
       propertyPath: damagePerSecond
-      value: 2
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 5843078306653376258, guid: 392add6665d09384da940059d56abfca, type: 3}
       propertyPath: m_Name

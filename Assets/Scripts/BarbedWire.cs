@@ -11,53 +11,61 @@ public class BarbedWire : MonoBehaviour
     private void OnTriggerStay(Collider other)
     {
         Enemy enemy = GetEnemyFromCollider(other);
+        EnemyMovement movement = GetEnemyMovementFromCollider(other);
+
         if (enemy != null)
         {
             float currentTime = Time.time;
 
-            // ✅ Use the silent version of TakeDamage
+            // Deal damage once per second
             if (currentTime - enemy.lastDamageTime >= 1f)
             {
-                enemy.TakeDamage(damagePerSecond); // This one doesn't play sound
+                enemy.TakeDamage(damagePerSecond);
                 enemy.lastDamageTime = currentTime;
             }
+        }
 
-            // ✅ Apply slow effect
-            enemy.ApplySpeedMultiplier(slowMultiplier);
+        // Apply slow every frame
+        if (movement != null)
+        {
+            movement.ApplySpeedMultiplier(slowMultiplier);
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        Enemy enemy = GetEnemyFromCollider(other);
-        if (enemy != null)
+        EnemyMovement movement = GetEnemyMovementFromCollider(other);
+        if (movement != null)
         {
             // Reset speed to normal
-            enemy.ApplySpeedMultiplier(1f);
+            movement.ApplySpeedMultiplier(1f);
         }
     }
 
     private Enemy GetEnemyFromCollider(Collider col)
     {
-        // If direct hit
         if (col.CompareTag("Enemy"))
-        {
             return col.GetComponent<Enemy>();
-        }
 
-        // If it's a child hitbox
         EnemyHitbox hitbox = col.GetComponent<EnemyHitbox>();
-        if (hitbox != null && hitbox.enemy != null)
-        {
+        if (hitbox != null)
             return hitbox.enemy;
-        }
 
-        // Try root fallback
         Transform root = col.transform.root;
         if (root.CompareTag("Enemy"))
-        {
             return root.GetComponent<Enemy>();
-        }
+
+        return null;
+    }
+
+    private EnemyMovement GetEnemyMovementFromCollider(Collider col)
+    {
+        if (col.CompareTag("Enemy"))
+            return col.GetComponent<EnemyMovement>();
+
+        Transform root = col.transform.root;
+        if (root.CompareTag("Enemy"))
+            return root.GetComponent<EnemyMovement>();
 
         return null;
     }
