@@ -7,18 +7,16 @@ public class EnemyMovement : MonoBehaviour
     private NavMeshAgent agent;
     private Transform target;
     private bool isDead = false;
+    private bool isSlowed = false;
 
     private Enemy enemy;
 
-    [HideInInspector] public float baseSpeed;
     [HideInInspector] public float originalSpeed;
-    [HideInInspector] public bool isSlowed = false;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        baseSpeed = agent.speed;
-        originalSpeed = baseSpeed;
+        originalSpeed = agent.speed;
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
@@ -38,26 +36,55 @@ public class EnemyMovement : MonoBehaviour
             return;
         }
 
-        if (target != null)
+        if (target != null && !agent.isStopped)
         {
             agent.SetDestination(target.position);
         }
     }
 
+    // 🐌 Apply slowdown (barbed wire etc.)
     public void ApplySpeedMultiplier(float multiplier)
     {
         if (agent == null || isDead) return;
 
-        multiplier = Mathf.Clamp(multiplier, 0.01f, 1f); // Prevent zero or negative speed
-        agent.speed = baseSpeed * multiplier;
-        isSlowed = true;
+        multiplier = Mathf.Clamp(multiplier, 0.01f, 1f);
+        if (!isSlowed)
+        {
+            agent.speed = originalSpeed * multiplier;
+            isSlowed = true;
+            Debug.Log("🐌 Enemy slowed! New speed: " + agent.speed);
+        }
     }
 
+    // 🔄 Reset to normal speed
     public void ResetSpeedMultiplier()
     {
         if (agent == null || isDead) return;
 
-        agent.speed = baseSpeed;
-        isSlowed = false;
+        if (isSlowed)
+        {
+            agent.speed = originalSpeed;
+            isSlowed = false;
+            Debug.Log("🏃‍♂️ Enemy speed reset to: " + agent.speed);
+        }
+    }
+
+    // ⛔ Fully stop enemy movement (for hard effects like barbed wire)
+    public void StopMovement()
+    {
+        if (agent == null || isDead) return;
+
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
+        Debug.Log("⛔ Enemy movement fully stopped.");
+    }
+
+    // ▶️ Resume movement if previously stopped
+    public void ResumeMovement()
+    {
+        if (agent == null || isDead) return;
+
+        agent.isStopped = false;
+        Debug.Log("▶️ Enemy resumed movement.");
     }
 }

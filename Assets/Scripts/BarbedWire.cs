@@ -1,59 +1,50 @@
 ﻿using UnityEngine;
-using UnityEngine.AI;
+using System.Collections.Generic;
 
 public class BarbedWire : MonoBehaviour
 {
-    [Header("Slowdown Settings")]
-    public float slowMultiplier = 0.1f;
+    [Header("Trap Settings")]
+    public float damagePerSecond = 10f;
+    [Range(0f, 1f)] public float speedMultiplier = 0.2f;
 
-    [Header("Damage Settings")]
-    public float damagePerSecond = 5f;
-    public float damageInterval = 1f;
+    private List<Enemy> enemiesInWire = new List<Enemy>();
 
-    private void OnTriggerStay(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
-        // Try to find Enemy in parent
-        Enemy enemy = other.GetComponentInParent<Enemy>();
-        if (enemy == null || enemy.IsDead()) return;
-
-        // Get components from the same GameObject as the Enemy
-        NavMeshAgent agent = enemy.GetComponent<NavMeshAgent>();
-        if (agent == null) return;
-
-        // Slow down only once using BarbedWireSlowMemory
-        if (!enemy.TryGetComponent<BarbedWireSlowMemory>(out var memory))
+        Enemy enemy = other.GetComponent<Enemy>();
+        if (enemy != null && !enemiesInWire.Contains(enemy))
         {
-            memory = enemy.gameObject.AddComponent<BarbedWireSlowMemory>();
-            memory.originalSpeed = agent.speed;
-            agent.speed = memory.originalSpeed * slowMultiplier;
-        }
-
-        // Apply damage over time
-        if (Time.time - memory.lastDamageTime >= damageInterval)
-        {
-            enemy.TakeDamage(damagePerSecond);
-            memory.lastDamageTime = Time.time;
+            enemiesInWire.Add(enemy);
+            enemy.ApplySpeedMultiplier(speedMultiplier);
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        Enemy enemy = other.GetComponentInParent<Enemy>();
-        if (enemy == null) return;
-
-        NavMeshAgent agent = enemy.GetComponent<NavMeshAgent>();
-        BarbedWireSlowMemory memory = enemy.GetComponent<BarbedWireSlowMemory>();
-
-        if (agent != null && memory != null)
+        Enemy enemy = other.GetComponent<Enemy>();
+        if (enemy != null && enemiesInWire.Contains(enemy))
         {
-            agent.speed = memory.originalSpeed;
-            Destroy(memory);
+            enemiesInWire.Remove(enemy);
+            enemy.ResetSpeedMultiplier();
         }
     }
-}
 
-public class BarbedWireSlowMemory : MonoBehaviour
-{
-    public float originalSpeed;
-    public float lastDamageTime;
+    private void Update()
+    {
+        if (enemiesInWire.Count == 0) return;
+
+        float damage = damagePerSecond * Time.deltaTime;
+        for (int i = enemiesInWire.Count - 1; i >= 0; i--)
+        {
+            Enemy enemy = enemiesInWire[i];
+
+            if (enemy == null || enemy.IsDead())
+            {
+                enemiesInWire.RemoveAt(i);
+                continue;
+            }
+
+            enemy.TakeDamage(damage);
+        }
+    }
 }

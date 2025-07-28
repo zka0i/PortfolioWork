@@ -1,16 +1,20 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
 
 public class EnemyAI : MonoBehaviour
 {
+    [Header("Detection")]
     public float detectionRadius = 15f;
     public float attackRange = 2f;
-    public float damage = 10f;
-    public float damageInterval = 1f; // Time between damage ticks
 
+    [Header("Attack Settings")]
+    public float damage = 10f;
+    public float damageInterval = 1f;
+
+    [Header("References")]
     public Transform player;
     public Generator generator;
-    public GameObject destroyedGeneratorPrefab; // Prefab to spawn after destruction
+    public GameObject destroyedGeneratorPrefab;
 
     private NavMeshAgent agent;
     private Enemy enemyScript;
@@ -24,7 +28,11 @@ public class EnemyAI : MonoBehaviour
         enemyScript = GetComponent<Enemy>();
 
         if (player == null)
-            player = GameObject.FindGameObjectWithTag("Player").transform;
+        {
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null)
+                player = playerObj.transform;
+        }
 
         if (generator == null)
             generator = FindObjectOfType<Generator>();
@@ -35,11 +43,12 @@ public class EnemyAI : MonoBehaviour
 
     void Update()
     {
+        if (enemyScript != null && enemyScript.IsDying()) return;
         if (player == null || generator == null) return;
 
-        bool playerInSight = PlayerInSight();
+        bool canSeePlayer = PlayerInSight();
 
-        if (playerInSight)
+        if (canSeePlayer)
         {
             agent.stoppingDistance = attackRange;
             agent.isStopped = false;
@@ -47,12 +56,10 @@ public class EnemyAI : MonoBehaviour
         }
         else
         {
+            float distToGen = Vector3.Distance(transform.position, generator.transform.position);
             agent.stoppingDistance = attackRange;
 
-            float generatorDist = Vector3.Distance(transform.position, generator.transform.position);
-
-            // Stop moving if close enough to prevent clipping
-            if (generatorDist <= attackRange + 0.5f)
+            if (distToGen <= attackRange + 0.5f)
             {
                 agent.isStopped = true;
             }
@@ -70,31 +77,34 @@ public class EnemyAI : MonoBehaviour
     {
         if (Time.time < lastDamageTime + damageInterval) return;
 
-        float playerDist = Vector3.Distance(transform.position, player.position);
-        float generatorDist = Vector3.Distance(transform.position, generator.transform.position);
+        float distToPlayer = Vector3.Distance(transform.position, player.position);
+        float distToGen = Vector3.Distance(transform.position, generator.transform.position);
 
-        if (playerStats != null && playerDist <= attackRange && PlayerInSight())
+        if (playerStats != null && distToPlayer <= attackRange && PlayerInSight())
         {
             playerStats.TakeDamage(damage);
             lastDamageTime = Time.time;
+            Debug.Log("⚔️ Enemy attacked PLAYER for " + damage);
         }
-        else if (generatorDist <= attackRange && !PlayerInSight())
+        else if (distToGen <= attackRange && !PlayerInSight())
         {
             generator.TakeDamage(damage);
             lastDamageTime = Time.time;
+            Debug.Log("⚙️ Enemy attacked GENERATOR for " + damage);
 
             if (generator.CurrentHealth <= 0 && destroyedGeneratorPrefab != null)
             {
                 Instantiate(destroyedGeneratorPrefab, generator.transform.position, generator.transform.rotation);
                 Destroy(generator.gameObject);
+                Debug.Log("💥 Generator destroyed and replaced with broken prefab.");
             }
         }
     }
 
     bool PlayerInSight()
     {
-        float distance = Vector3.Distance(transform.position, player.position);
-        if (distance > detectionRadius) return false;
+        float dist = Vector3.Distance(transform.position, player.position);
+        if (dist > detectionRadius) return false;
 
         Ray ray = new Ray(transform.position + Vector3.up, (player.position - transform.position).normalized);
         if (Physics.Raycast(ray, out RaycastHit hit, detectionRadius))
