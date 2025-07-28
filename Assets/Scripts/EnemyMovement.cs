@@ -6,26 +6,23 @@ public class EnemyMovement : MonoBehaviour
 {
     private NavMeshAgent agent;
     private Transform target;
-    private float baseSpeed;
-    private float speedResetTimer;
-    private bool isSlowed = false;
     private bool isDead = false;
 
     private Enemy enemy;
 
-    [Header("Slowdown Settings")]
-    public float slowResetTime = 2f;
+    [HideInInspector] public float baseSpeed;
+    [HideInInspector] public float originalSpeed;
+    [HideInInspector] public bool isSlowed = false;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         baseSpeed = agent.speed;
+        originalSpeed = baseSpeed;
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
-        {
             target = player.transform;
-        }
 
         enemy = GetComponent<Enemy>();
     }
@@ -45,27 +42,22 @@ public class EnemyMovement : MonoBehaviour
         {
             agent.SetDestination(target.position);
         }
-
-        // Restore speed after timer
-        if (isSlowed)
-        {
-            speedResetTimer -= Time.deltaTime;
-            if (speedResetTimer <= 0f)
-            {
-                agent.speed = baseSpeed;
-                isSlowed = false;
-            }
-        }
     }
 
-    // Called from BarbedWire
     public void ApplySpeedMultiplier(float multiplier)
     {
-        if (agent == null) return;
-        if (isDead) return;
+        if (agent == null || isDead) return;
 
+        multiplier = Mathf.Clamp(multiplier, 0.01f, 1f); // Prevent zero or negative speed
         agent.speed = baseSpeed * multiplier;
         isSlowed = true;
-        speedResetTimer = slowResetTime;
+    }
+
+    public void ResetSpeedMultiplier()
+    {
+        if (agent == null || isDead) return;
+
+        agent.speed = baseSpeed;
+        isSlowed = false;
     }
 }

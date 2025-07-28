@@ -52,7 +52,7 @@ MonoBehaviour:
   damageAmount: 50
   damageInterval: 1
   lastDamageTime: 0
-  audioSource: {fileID: 7288419216212923757}
+  audioSource: {fileID: 0}
   headshotSound: {fileID: 8300000, guid: b002ad4064466194cbac0ead4ea0ec6c, type: 3}
   bodyHitSound: {fileID: 8300000, guid: 010aceda8962fe943a5eb826efd35da8, type: 3}
 --- !u!54 &2075631877837221896

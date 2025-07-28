@@ -9,6 +9,7 @@ TagManager:
   - Enemy
   - PrimaryWeapon
   - SecondaryWeapon
+  - BarbedWire
   layers:
   - Default
   - TransparentFX

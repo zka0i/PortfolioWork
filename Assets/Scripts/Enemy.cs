@@ -19,7 +19,7 @@ public class Enemy : MonoBehaviour
 
     private EnemyMovement enemyMovement;
 
-    void Awake()
+    private void Awake()
     {
         // Assign this Enemy to all child hitboxes
         EnemyHitbox[] hitboxes = GetComponentsInChildren<EnemyHitbox>();
@@ -32,7 +32,7 @@ public class Enemy : MonoBehaviour
         enemyMovement = GetComponent<EnemyMovement>();
     }
 
-    void Start()
+    private void Start()
     {
         currentHealth = maxHealth;
 
@@ -58,7 +58,6 @@ public class Enemy : MonoBehaviour
 
         Debug.Log("☠️ Enemy took damage: " + amount + (isHeadshot ? " (HEAD)" : " (BODY)"));
 
-        // Only play sound for gun damage
         if (audioSource != null && !isDying)
         {
             if (isHeadshot && willDie && headshotSound != null)
@@ -129,6 +128,14 @@ public class Enemy : MonoBehaviour
         if (enemyMovement != null)
         {
             enemyMovement.ApplySpeedMultiplier(multiplier);
+        }
+    }
+
+    public void ResetSpeedMultiplier()
+    {
+        if (enemyMovement != null)
+        {
+            enemyMovement.ResetSpeedMultiplier();
         }
     }
 
