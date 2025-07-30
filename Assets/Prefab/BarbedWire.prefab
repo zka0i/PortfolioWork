@@ -18,15 +18,15 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 5ef0456a8a2abdb47a1794c42506fe7c, type: 2}
     - target: {fileID: -8679921383154817045, guid: 722025af298064343b3c178cf83da9c0, type: 3}
       propertyPath: m_LocalScale.x
-      value: 12.304617
+      value: 0.90741163
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 722025af298064343b3c178cf83da9c0, type: 3}
       propertyPath: m_LocalScale.y
-      value: 4.057758
+      value: 0.8616594
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 722025af298064343b3c178cf83da9c0, type: 3}
       propertyPath: m_LocalScale.z
-      value: 2.134307
+      value: 0.9026831
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 722025af298064343b3c178cf83da9c0, type: 3}
       propertyPath: m_LocalPosition.x
@@ -66,6 +66,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 722025af298064343b3c178cf83da9c0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 722025af298064343b3c178cf83da9c0, type: 3}
+      propertyPath: m_ConstrainProportionsScale
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8406394115312971819, guid: 722025af298064343b3c178cf83da9c0, type: 3}
@@ -205,7 +209,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6f205b63b3292640936d30a976c8915, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetAgent: {fileID: 0}
-  targetRigidbody: {fileID: 0}
-  slowMultiplier: -10000
+  slowMultiplier: 0.1
   damagePerSecond: 5

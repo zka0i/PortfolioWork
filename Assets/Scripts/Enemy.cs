@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class Enemy : MonoBehaviour
 {
@@ -30,6 +31,15 @@ public class Enemy : MonoBehaviour
 
         // Get movement reference
         enemyMovement = GetComponent<EnemyMovement>();
+
+        // 🔗 Register this enemy in EnemyRegistry
+        EnemyRegistry.Register(this);
+    }
+
+    private void OnDestroy()
+    {
+        // ❌ Remove this enemy from the registry on destruction
+        EnemyRegistry.Unregister(this);
     }
 
     private void Start()

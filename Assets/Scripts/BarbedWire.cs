@@ -1,50 +1,80 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.AI;
 
 public class BarbedWire : MonoBehaviour
 {
-    [Header("Trap Settings")]
-    public float damagePerSecond = 10f;
-    [Range(0f, 1f)] public float speedMultiplier = 0.2f;
+    public float slowMultiplier = 0.5f;
+    public float damagePerSecond = 5f;
 
-    private List<Enemy> enemiesInWire = new List<Enemy>();
+    private Dictionary<NavMeshAgent, float> slowedAgents = new Dictionary<NavMeshAgent, float>();
+    private Dictionary<Enemy, float> damageTimers = new Dictionary<Enemy, float>();
 
     private void OnTriggerEnter(Collider other)
     {
-        Enemy enemy = other.GetComponent<Enemy>();
-        if (enemy != null && !enemiesInWire.Contains(enemy))
+        Debug.Log("🧪 OnTriggerEnter hit: " + other.name);
+
+        Enemy enemy = other.GetComponentInParent<Enemy>();
+        if (enemy != null)
         {
-            enemiesInWire.Add(enemy);
-            enemy.ApplySpeedMultiplier(speedMultiplier);
+            if (!damageTimers.ContainsKey(enemy))
+            {
+                damageTimers.Add(enemy, 0f);
+                Debug.Log("☠️ Started damaging enemy: " + enemy.name);
+            }
+
+            NavMeshAgent agent = other.GetComponentInParent<NavMeshAgent>();
+            if (agent != null && !slowedAgents.ContainsKey(agent))
+            {
+                float originalSpeed = agent.speed;
+                slowedAgents.Add(agent, originalSpeed);
+
+                agent.speed = originalSpeed * slowMultiplier;
+                Debug.Log($"🐌 Slowed {agent.name} from {originalSpeed} to {agent.speed}");
+            }
+        }
+        else
+        {
+            Debug.Log("👻 Triggered object is not an Enemy: " + other.name);
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        Enemy enemy = other.GetComponentInParent<Enemy>();
+        if (enemy != null && damageTimers.ContainsKey(enemy))
+        {
+            float lastTime = damageTimers[enemy];
+            if (Time.time - lastTime >= 1f)
+            {
+                enemy.TakeDamage(damagePerSecond);
+                damageTimers[enemy] = Time.time;
+                Debug.Log($"🔥 Dealt {damagePerSecond} damage to: {enemy.name}");
+            }
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        Enemy enemy = other.GetComponent<Enemy>();
-        if (enemy != null && enemiesInWire.Contains(enemy))
+        Debug.Log("🚪 OnTriggerExit hit: " + other.name);
+
+        Enemy enemy = other.GetComponentInParent<Enemy>();
+        if (enemy != null)
         {
-            enemiesInWire.Remove(enemy);
-            enemy.ResetSpeedMultiplier();
-        }
-    }
-
-    private void Update()
-    {
-        if (enemiesInWire.Count == 0) return;
-
-        float damage = damagePerSecond * Time.deltaTime;
-        for (int i = enemiesInWire.Count - 1; i >= 0; i--)
-        {
-            Enemy enemy = enemiesInWire[i];
-
-            if (enemy == null || enemy.IsDead())
+            if (damageTimers.ContainsKey(enemy))
             {
-                enemiesInWire.RemoveAt(i);
-                continue;
+                damageTimers.Remove(enemy);
+                Debug.Log("💨 Stopped damaging enemy: " + enemy.name);
             }
 
-            enemy.TakeDamage(damage);
+            NavMeshAgent agent = other.GetComponentInParent<NavMeshAgent>();
+            if (agent != null && slowedAgents.ContainsKey(agent))
+            {
+                float originalSpeed = slowedAgents[agent];
+                agent.speed = originalSpeed;
+                slowedAgents.Remove(agent);
+                Debug.Log($"🏃 Restored {agent.name} speed to {originalSpeed}");
+            }
         }
     }
 }
