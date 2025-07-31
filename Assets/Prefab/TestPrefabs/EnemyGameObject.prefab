@@ -324,13 +324,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5920046b1a91726428e8e3d5f1f92bf4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  detectionRadius: 15
-  attackRange: 2
-  damage: 10
-  damageInterval: 1
   player: {fileID: 0}
   generator: {fileID: 0}
-  destroyedGeneratorPrefab: {fileID: 0}
+  detectionRadius: 15
+  fieldOfViewAngle: 120
 --- !u!114 &8990997439733306784
 MonoBehaviour:
   m_ObjectHideFlags: 0
