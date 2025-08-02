@@ -10,6 +10,8 @@ TagManager:
   - PrimaryWeapon
   - SecondaryWeapon
   - BarbedWire
+  - GeneratorZone
+  - EnemyZone
   layers:
   - Default
   - TransparentFX

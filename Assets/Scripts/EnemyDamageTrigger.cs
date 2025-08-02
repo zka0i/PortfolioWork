@@ -2,31 +2,36 @@
 
 public class EnemyDamageTrigger : MonoBehaviour
 {
-    public Enemy parentEnemy;
+    [Header("Damage Settings")]
+    public float damageInterval = 1f;
+    public float damagePerTick = 5f;
+
+    private float lastDamageTime;
+    private Generator generator;
+
+    private void Start()
+    {
+        // Try to find Generator component in parent
+        generator = GetComponentInParent<Generator>();
+        if (generator == null)
+        {
+            Debug.LogWarning("⚠️ Generator script not found in parent!");
+        }
+    }
 
     private void OnTriggerStay(Collider other)
     {
-        // Damage Player
-        if (other.CompareTag("Player"))
+        Debug.Log($"💥 Trigger entered by: {other.name} (Tag: {other.tag})");
+
+        // Only apply damage if EnemyZone is inside the trigger
+        if (other.CompareTag("EnemyZone"))
         {
-            PlayerStats player = other.GetComponent<PlayerStats>();
-            if (player != null && Time.time - parentEnemy.lastDamageTime >= parentEnemy.damageInterval)
+            if (generator != null && Time.time - lastDamageTime >= damageInterval)
             {
-                player.TakeDamage(parentEnemy.damageAmount);
-                parentEnemy.lastDamageTime = Time.time;
-
-                Debug.Log("💢 Enemy Trigger: Damaged player for " + parentEnemy.damageAmount);
+                generator.TakeDamage(damagePerTick);
+                lastDamageTime = Time.time;
+                Debug.Log("⚙️ Enemy is damaging the generator!");
             }
-        }
-
-        // Damage Generator
-        Generator generator = other.GetComponent<Generator>();
-        if (generator != null && Time.time - parentEnemy.lastDamageTime >= parentEnemy.damageInterval)
-        {
-            generator.TakeDamage(parentEnemy.damageAmount);
-            parentEnemy.lastDamageTime = Time.time;
-
-            Debug.Log("⚠️ Enemy Trigger: Damaged generator for " + parentEnemy.damageAmount);
         }
     }
 }

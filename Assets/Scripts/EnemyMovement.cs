@@ -5,7 +5,6 @@ using UnityEngine.AI;
 public class EnemyMovement : MonoBehaviour
 {
     private NavMeshAgent agent;
-    private Transform target;
     private bool isDead = false;
     private bool isSlowed = false;
 
@@ -17,11 +16,6 @@ public class EnemyMovement : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         originalSpeed = agent.speed;
-
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
-            target = player.transform;
-
         enemy = GetComponent<Enemy>();
     }
 
@@ -36,10 +30,7 @@ public class EnemyMovement : MonoBehaviour
             return;
         }
 
-        if (target != null && !agent.isStopped)
-        {
-            agent.SetDestination(target.position);
-        }
+        // 🛑 DO NOT control SetDestination here — EnemyAI handles that!
     }
 
     // 🐌 Apply slowdown (barbed wire etc.)
@@ -69,22 +60,16 @@ public class EnemyMovement : MonoBehaviour
         }
     }
 
-    // ⛔ Fully stop enemy movement (for hard effects like barbed wire)
     public void StopMovement()
     {
         if (agent == null || isDead) return;
-
         agent.isStopped = true;
         agent.velocity = Vector3.zero;
-        Debug.Log("⛔ Enemy movement fully stopped.");
     }
 
-    // ▶️ Resume movement if previously stopped
     public void ResumeMovement()
     {
         if (agent == null || isDead) return;
-
         agent.isStopped = false;
-        Debug.Log("▶️ Enemy resumed movement.");
     }
 }

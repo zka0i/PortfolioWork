@@ -391,7 +391,7 @@ GameObject:
   - component: {fileID: 8428523771628880224}
   m_Layer: 0
   m_Name: DangerZone
-  m_TagString: Untagged
+  m_TagString: EnemyZone
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -447,7 +447,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d908053da3de574587179bd249903b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  parentEnemy: {fileID: 449594088948774464}
+  damageAmount: 10
+  damageInterval: 1
 --- !u!1 &6134557383720673158
 GameObject:
   m_ObjectHideFlags: 0
