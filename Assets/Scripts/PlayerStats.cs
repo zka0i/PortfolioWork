@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
@@ -24,6 +24,8 @@ public class PlayerStats : MonoBehaviour
     private bool isUsingEnergyDrink = false;
     private float originalSprintSpeed;
 
+    private bool isDead = false;
+
     void Start()
     {
         currentHealth = maxHealth;
@@ -33,7 +35,8 @@ public class PlayerStats : MonoBehaviour
         if (staminaBar) staminaBar.maxValue = maxStamina;
 
         movement = GetComponent<PlayerMovement>();
-        originalSprintSpeed = movement.sprintSpeed;
+        if (movement != null)
+            originalSprintSpeed = movement.sprintSpeed;
     }
 
     void Update()
@@ -50,7 +53,7 @@ public class PlayerStats : MonoBehaviour
 
     void HandleStamina()
     {
-        if (isUsingEnergyDrink) return;
+        if (isUsingEnergyDrink || movement == null) return;
 
         bool isSprinting = Input.GetKey(KeyCode.LeftShift) && movement.IsMoving();
 
@@ -68,14 +71,38 @@ public class PlayerStats : MonoBehaviour
 
     public void TakeDamage(float amount)
     {
+        if (isDead) return;
+
         currentHealth -= amount;
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
+
+        Debug.Log($"☠️ Player took damage: {amount}. Current HP: {currentHealth}");
+
+        if (currentHealth <= 0f)
+        {
+            Die();
+        }
+    }
+
+    void Die()
+    {
+        if (isDead) return;
+
+        isDead = true;
+        Debug.Log("💀 Player has died.");
+
+        // Add custom game over / respawn logic here
+        // For example: disable movement, show game over screen, etc.
     }
 
     public void Heal(float amount)
     {
+        if (isDead) return;
+
         currentHealth += amount;
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
+
+        Debug.Log($"❤️ Player healed: {amount}. Current HP: {currentHealth}");
     }
 
     public void UseMedkit()
@@ -90,7 +117,7 @@ public class PlayerStats : MonoBehaviour
 
     public void UseEnergyDrink()
     {
-        if (isUsingEnergyDrink) return;
+        if (isUsingEnergyDrink || movement == null) return;
         StartCoroutine(EnergyDrinkRoutine());
     }
 

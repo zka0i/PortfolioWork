@@ -6,31 +6,42 @@ public class EnemyDamageTrigger : MonoBehaviour
     public float damageInterval = 1f;
     public float damagePerTick = 5f;
 
-    private float lastDamageTime;
-    private Generator generator;
-
-    private void Start()
-    {
-        // Try to find Generator component in parent
-        generator = GetComponentInParent<Generator>();
-        if (generator == null)
-        {
-            Debug.LogWarning("⚠️ Generator script not found in parent!");
-        }
-    }
+    private float lastDamageTimeToPlayer;
+    private float lastDamageTimeToGenerator;
 
     private void OnTriggerStay(Collider other)
     {
-        Debug.Log($"💥 Trigger entered by: {other.name} (Tag: {other.tag})");
+        Debug.Log($"💥 Trigger stay by: {other.name} (Tag: {other.tag})");
 
-        // Only apply damage if EnemyZone is inside the trigger
-        if (other.CompareTag("EnemyZone"))
+        // ✅ Damage the Player
+        if (other.CompareTag("Player"))
         {
-            if (generator != null && Time.time - lastDamageTime >= damageInterval)
+            PlayerStats playerStats = other.GetComponentInParent<PlayerStats>();
+            if (playerStats != null && Time.time - lastDamageTimeToPlayer >= damageInterval)
             {
+                Debug.Log("✅ Damaging Player");
+                playerStats.TakeDamage(damagePerTick);
+                lastDamageTimeToPlayer = Time.time;
+            }
+            else if (playerStats == null)
+            {
+                Debug.LogWarning("❌ PlayerStats not found!");
+            }
+        }
+
+        // ✅ Damage the Generator only when in its zone
+        else if (other.CompareTag("GeneratorZone"))
+        {
+            Generator generator = other.GetComponentInParent<Generator>();
+            if (generator != null && Time.time - lastDamageTimeToGenerator >= damageInterval)
+            {
+                Debug.Log("✅ Damaging Generator");
                 generator.TakeDamage(damagePerTick);
-                lastDamageTime = Time.time;
-                Debug.Log("⚙️ Enemy is damaging the generator!");
+                lastDamageTimeToGenerator = Time.time;
+            }
+            else if (generator == null)
+            {
+                Debug.LogWarning("❌ Generator not found in GeneratorZone parent!");
             }
         }
     }

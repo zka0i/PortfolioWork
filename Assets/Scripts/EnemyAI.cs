@@ -63,8 +63,11 @@ public class EnemyAI : MonoBehaviour
         if (angle > fieldOfViewAngle * 0.5f)
             return false;
 
+        // ✅ Ignore "PlayerTrigger" layer in this raycast
+        int layerMask = ~(1 << LayerMask.NameToLayer("PlayerTrigger"));
+
         Ray ray = new Ray(transform.position + Vector3.up, dirToPlayer.normalized);
-        if (Physics.Raycast(ray, out RaycastHit hit, detectionRadius))
+        if (Physics.Raycast(ray, out RaycastHit hit, detectionRadius, layerMask, QueryTriggerInteraction.Collide))
         {
             return hit.collider.CompareTag("Player");
         }
