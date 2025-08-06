@@ -11,8 +11,10 @@ public class Weapon : MonoBehaviour
 
     [Header("Ammo")]
     public int maxAmmo = 12;
+    public int maxReserveAmmo = 100;
     public float reloadTime = 1.5f;
     [HideInInspector] public int currentAmmo;
+    [HideInInspector] public int reserveAmmo;
 
     [Header("UI")]
     public Sprite weaponIcon;
@@ -34,10 +36,10 @@ public class Weapon : MonoBehaviour
     [Header("Audio")]
     public AudioClip shootSound;
     public AudioClip equipAudioClip;
-    public AudioClip reloadAudioClip;  // ✅ Drag your reload sound here!
+    public AudioClip reloadAudioClip;
     public float shootVolume = 0.6f;
     public float equipVolume = 0.7f;
-    public float reloadVolume = 0.7f;  // ✅ Adjust as you like
+    public float reloadVolume = 0.7f;
     private AudioSource audioSource;
 
     private float nextFireTime = 0f;
@@ -64,8 +66,8 @@ public class Weapon : MonoBehaviour
     public float equipAnimationTime = 0.5f;
 
     [Header("Reload Animation")]
-    public string reloadTriggerName = "Reload";  // ✅ Your reload trigger name
-    public float reloadAnimationTime = 1.5f;     // ✅ Match this to your reload clip
+    public string reloadTriggerName = "Reload";
+    public float reloadAnimationTime = 1.5f;
 
     private bool isEquipping = false;
 
@@ -84,6 +86,7 @@ public class Weapon : MonoBehaviour
         if (muzzleFlashRenderer != null) muzzleFlashRenderer.enabled = false;
 
         if (currentAmmo <= 0) currentAmmo = maxAmmo;
+        reserveAmmo = maxReserveAmmo;
 
         PlayEquipAnimation();
     }
@@ -138,7 +141,7 @@ public class Weapon : MonoBehaviour
                 enemy.TakeDamage(damage);
         }
 
-        Debug.Log($"{weaponName} fired! Remaining ammo: {currentAmmo}");
+        Debug.Log($"{weaponName} fired! Remaining ammo: {currentAmmo}/{reserveAmmo}");
 
         StartCoroutine(DoMuzzleFlash());
         StartCoroutine(SpawnBulletTracer(muzzlePoint.position, hitPoint));
@@ -175,16 +178,14 @@ public class Weapon : MonoBehaviour
 
     public void Reload()
     {
-        if (!isReloading && currentAmmo < maxAmmo)
+        if (!isReloading && currentAmmo < maxAmmo && reserveAmmo > 0)
         {
             isReloading = true;
             Debug.Log($"Reloading {weaponName}...");
 
-            // ✅ Trigger reload animation
             if (animator != null)
                 animator.SetTrigger(reloadTriggerName);
 
-            // ✅ Play reload sound
             if (reloadAudioClip != null)
                 audioSource.PlayOneShot(reloadAudioClip, reloadVolume);
 
@@ -196,11 +197,16 @@ public class Weapon : MonoBehaviour
     {
         yield return new WaitForSeconds(reloadAnimationTime);
 
-        currentAmmo = maxAmmo;
+        int bulletsNeeded = maxAmmo - currentAmmo;
+        int bulletsToLoad = Mathf.Min(bulletsNeeded, reserveAmmo);
+
+        currentAmmo += bulletsToLoad;
+        reserveAmmo -= bulletsToLoad;
+
         isReloading = false;
         reloadCoroutine = null;
 
-        Debug.Log($"{weaponName} reloaded.");
+        Debug.Log($"{weaponName} reloaded. Ammo: {currentAmmo}/{reserveAmmo}");
     }
 
     public void CancelReload()

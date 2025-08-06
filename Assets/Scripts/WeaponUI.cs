@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
@@ -29,7 +29,9 @@ public class WeaponUI : MonoBehaviour
 
         if (currentWeapon != null)
         {
-            ammoText.text = $"{currentWeapon.currentAmmo} / {currentWeapon.maxAmmo}";
+            // ✅ Show current mag ammo and reserve ammo properly
+            ammoText.text = $"{currentWeapon.currentAmmo} / {currentWeapon.reserveAmmo}";
+
             if (currentWeapon.weaponIcon != null)
             {
                 weaponIconImage.sprite = currentWeapon.weaponIcon;
