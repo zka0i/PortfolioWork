@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -17,6 +17,7 @@ public class PowerupSpawner : MonoBehaviour
     public GameObject medkitPrefab;
     public GameObject bandagePrefab;
     public GameObject energyDrinkPrefab;
+    public GameObject ammoBoxPrefab; // ✅ New ammo box prefab
 
     [Header("Spawn Settings")]
     public float respawnDelay = 20f;
@@ -89,9 +90,11 @@ public class PowerupSpawner : MonoBehaviour
     GameObject GetRandomPowerup()
     {
         float roll = Random.value;
-        if (roll < 0.4f) return bandagePrefab;
-        else if (roll < 0.8f) return energyDrinkPrefab;
-        else return medkitPrefab;
+
+        if (roll < 0.3f) return bandagePrefab;
+        else if (roll < 0.6f) return energyDrinkPrefab;
+        else if (roll < 0.9f) return ammoBoxPrefab; // ✅ 30% chance for ammo box
+        else return medkitPrefab; // ✅ 10% chance for extra medkit (not the guaranteed one)
     }
 
     void Shuffle(List<int> list)

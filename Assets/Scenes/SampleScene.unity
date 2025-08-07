@@ -151402,6 +151402,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1223971631491569634, guid: 45d62439c2dbe1745bd7efbc3ed0338b, type: 3}
+      propertyPath: ammoBoxPrefab
+      value: 
+      objectReference: {fileID: 2202362553185851795, guid: 3be33815187068540bf4678df0b8a942, type: 3}
     - target: {fileID: 3515580208994265215, guid: 45d62439c2dbe1745bd7efbc3ed0338b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 84.83
@@ -152421,8 +152425,10 @@ MonoBehaviour:
   fireRate: 0.5
   range: 100
   maxAmmo: 35
+  maxReserveAmmo: 100
   reloadTime: 1.5
   currentAmmo: 50
+  reserveAmmo: 0
   weaponIcon: {fileID: 21300000, guid: f6e1c6bf81a37c84abf072f9abe6e8f3, type: 3}
   modelTransform: {fileID: 8846197937975288422}
   recoilKick: {x: 0, y: 0, z: -0.1}
@@ -153147,15 +153153,15 @@ PrefabInstance:
       objectReference: {fileID: 281829378}
     - target: {fileID: 7119840033203666037, guid: a95f5a71ce7f88f4a996fdaeb5e162f3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 47.85
+      value: 80.9
       objectReference: {fileID: 0}
     - target: {fileID: 7119840033203666037, guid: a95f5a71ce7f88f4a996fdaeb5e162f3, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 16.11
+      value: 11.22
       objectReference: {fileID: 0}
     - target: {fileID: 7119840033203666037, guid: a95f5a71ce7f88f4a996fdaeb5e162f3, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 44.15
+      value: 8.41
       objectReference: {fileID: 0}
     - target: {fileID: 7119840033203666037, guid: a95f5a71ce7f88f4a996fdaeb5e162f3, type: 3}
       propertyPath: m_LocalRotation.w
@@ -154087,8 +154093,10 @@ MonoBehaviour:
   fireRate: 0.1
   range: 100
   maxAmmo: 100
+  maxReserveAmmo: 100
   reloadTime: 1.5
   currentAmmo: 80
+  reserveAmmo: 0
   weaponIcon: {fileID: 21300000, guid: 48f7b1ebcd236da4e8a51a9de014461d, type: 3}
   modelTransform: {fileID: 2590978732733846365}
   recoilKick: {x: 0, y: 0, z: -0.1}
