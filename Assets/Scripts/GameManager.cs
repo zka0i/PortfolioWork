@@ -32,6 +32,22 @@ public class GameManager : MonoBehaviour
     public Weapon weapon;
     public MonoBehaviour cameraLookScript;
 
+    [Header("Difficulty Scaling")]
+    public float baseSpawnRateMultiplier = 1f;
+    public float spawnRateGrowthPerNight = 0.1f;
+    public float baseEnemySpeedMultiplier = 1f;
+    public float speedGrowthPerNight = 0.1f;
+
+    [Header("Final Wave Helicopter")]
+    public GameObject helicopterPrefab;
+    public Transform helicopterSpawnPoint;
+    public Transform helicopterLandingPoint;
+    public float helicopterSpeed = 5f;
+    public float finalWaveSpawnRateMultiplier = 3f;
+
+    [Header("Debug Testing")]
+    public bool startAtFinalWave = false;
+
     private bool gameEnded = false;
     private bool fading = false;
     private float fadeTimer = 0f;
@@ -45,13 +61,8 @@ public class GameManager : MonoBehaviour
     private bool isIntermission = false;
     private float intermissionTimer = 0f;
 
-    // === Difficulty Scaling Settings ===
-    [Header("Difficulty Scaling")]
-    public float baseSpawnRateMultiplier = 1f;
-    public float spawnRateGrowthPerNight = 0.1f;
-
-    public float baseEnemySpeedMultiplier = 1f;
-    public float speedGrowthPerNight = 0.1f;
+    private GameObject activeHelicopter;
+    private bool finalWaveTriggered = false;
 
     void Awake()
     {
@@ -69,6 +80,9 @@ public class GameManager : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        if (startAtFinalWave)
+            currentNight = maxNights;
 
         StartNight(currentNight);
     }
@@ -105,14 +119,14 @@ public class GameManager : MonoBehaviour
                 }
                 else
                 {
-                    ShowWinScreen();
+                    ShowWinScreen(); // Normally never reached due to helicopter win condition
                 }
             }
 
             return;
         }
 
-        if (enemySpawner.TimerExpired() && enemySpawner.AllEnemiesDefeated)
+        if (currentNight < maxNights && enemySpawner.TimerExpired() && enemySpawner.AllEnemiesDefeated)
         {
             isIntermission = true;
             intermissionTimer = intermissionDuration;
@@ -123,13 +137,13 @@ public class GameManager : MonoBehaviour
                 intermissionText.text = $"Intermission: {Mathf.CeilToInt(intermissionTimer)}s";
             }
 
-            enemySpawner.StopSpawning(); // Stop spawn timer during intermission
-
+            enemySpawner.StopSpawning();
             Debug.Log("Intermission started.");
             return;
         }
 
         HandleNightFade();
+        HandleHelicopterMovement();
     }
 
     void StartNight(int nightNumber)
@@ -158,6 +172,46 @@ public class GameManager : MonoBehaviour
             fadeState = FadeState.FadeIn;
             fading = true;
         }
+
+        if (nightNumber == maxNights && !finalWaveTriggered)
+        {
+            TriggerFinalWave();
+        }
+    }
+
+    void TriggerFinalWave()
+    {
+        finalWaveTriggered = true;
+
+        if (enemySpawner != null)
+        {
+            enemySpawner.spawnRateMultiplier *= finalWaveSpawnRateMultiplier;
+            Debug.Log("🔥 Final wave triggered: Massive zombie spawn!");
+        }
+
+        if (helicopterPrefab != null && helicopterSpawnPoint != null)
+        {
+            activeHelicopter = Instantiate(helicopterPrefab, helicopterSpawnPoint.position, helicopterSpawnPoint.rotation);
+            Debug.Log("🚁 Helicopter spawned and en route.");
+        }
+
+        if (intermissionText != null)
+        {
+            intermissionText.gameObject.SetActive(true);
+            intermissionText.text = "Get to the helicopter for extraction!";
+        }
+    }
+
+    void HandleHelicopterMovement()
+    {
+        if (activeHelicopter == null || helicopterLandingPoint == null) return;
+
+        float step = helicopterSpeed * Time.deltaTime;
+        activeHelicopter.transform.position = Vector3.MoveTowards(
+            activeHelicopter.transform.position,
+            helicopterLandingPoint.position,
+            step
+        );
     }
 
     void HandleNightFade()
@@ -209,7 +263,7 @@ public class GameManager : MonoBehaviour
         graphic.color = c;
     }
 
-    void ShowWinScreen()
+    public void ShowWinScreen()
     {
         gameEnded = true;
         winScreen.SetActive(true);
@@ -250,7 +304,6 @@ public class GameManager : MonoBehaviour
             cameraLookScript.enabled = true;
     }
 
-    // === SCALING FUNCTION ===
     void ApplyDifficultyScaling(int night)
     {
         float spawnRate = baseSpawnRateMultiplier + (night - 1) * spawnRateGrowthPerNight;
@@ -258,7 +311,7 @@ public class GameManager : MonoBehaviour
 
         if (enemySpawner != null)
         {
-            enemySpawner.spawnRateMultiplier = spawnRate;
+            enemySpawner.spawnRateMultiplier = Mathf.Max(0.2f, spawnRate);
             enemySpawner.enemySpeedMultiplier = speedMult;
         }
 

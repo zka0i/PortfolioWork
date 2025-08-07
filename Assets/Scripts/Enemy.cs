@@ -18,27 +18,25 @@ public class Enemy : MonoBehaviour
     public AudioClip headshotSound;
     public AudioClip bodyHitSound;
 
+    [Header("Debug")]
+    public bool enableDebugLogs = false;
+
     private EnemyMovement enemyMovement;
 
     private void Awake()
     {
-        // Assign this Enemy to all child hitboxes
         EnemyHitbox[] hitboxes = GetComponentsInChildren<EnemyHitbox>();
         foreach (EnemyHitbox hb in hitboxes)
         {
             hb.enemy = this;
         }
 
-        // Get movement reference
         enemyMovement = GetComponent<EnemyMovement>();
-
-        // 🔗 Register this enemy in EnemyRegistry
         EnemyRegistry.Register(this);
     }
 
     private void OnDestroy()
     {
-        // ❌ Remove this enemy from the registry on destruction
         EnemyRegistry.Unregister(this);
     }
 
@@ -49,7 +47,7 @@ public class Enemy : MonoBehaviour
         if (audioSource == null)
         {
             audioSource = GetComponent<AudioSource>();
-            if (audioSource == null)
+            if (audioSource == null && enableDebugLogs)
             {
                 Debug.LogWarning("❌ No AudioSource found on this enemy.");
             }
@@ -66,18 +64,19 @@ public class Enemy : MonoBehaviour
         currentHealth -= amount;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
-        Debug.Log("☠️ Enemy took damage: " + amount + (isHeadshot ? " (HEAD)" : " (BODY)"));
+        if (enableDebugLogs)
+            Debug.Log("☠️ Enemy took damage: " + amount + (isHeadshot ? " (HEAD)" : " (BODY)"));
 
         if (audioSource != null && !isDying)
         {
             if (isHeadshot && willDie && headshotSound != null)
             {
-                Debug.Log("🔊 Playing HEADSHOT DEATH sound");
+                if (enableDebugLogs) Debug.Log("🔊 Playing HEADSHOT DEATH sound");
                 audioSource.PlayOneShot(headshotSound);
             }
             else if (!willDie && bodyHitSound != null)
             {
-                Debug.Log("🔊 Playing BODY hit sound");
+                if (enableDebugLogs) Debug.Log("🔊 Playing BODY hit sound");
                 audioSource.PlayOneShot(bodyHitSound);
             }
         }
@@ -96,7 +95,8 @@ public class Enemy : MonoBehaviour
         currentHealth -= amount;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
-        Debug.Log("☠️ Trap damaged enemy silently: " + amount);
+        if (enableDebugLogs)
+            Debug.Log("☠️ Trap damaged enemy silently: " + amount);
 
         if (currentHealth <= 0f)
         {
@@ -104,16 +104,13 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    // 🧠 Common death logic
     private void Die(bool isHeadshot)
     {
         isDying = true;
 
-        // Disable collider
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
 
-        // Hide all renderers
         Renderer[] renderers = GetComponentsInChildren<Renderer>();
         foreach (Renderer r in renderers)
             r.enabled = false;
@@ -132,7 +129,6 @@ public class Enemy : MonoBehaviour
         Destroy(gameObject, destroyDelay);
     }
 
-    // 🐌 Barbed wire slows the enemy
     public void ApplySpeedMultiplier(float multiplier)
     {
         if (enemyMovement != null)
@@ -149,13 +145,11 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    // ✅ Public method so other scripts (like movement) can know if enemy is dead
     public bool IsDead()
     {
         return isDying;
     }
 
-    // ✅ Needed by EnemyMovement and others to check if enemy is dying
     public bool IsDying()
     {
         return isDying;

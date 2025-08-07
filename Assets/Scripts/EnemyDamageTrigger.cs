@@ -6,12 +6,16 @@ public class EnemyDamageTrigger : MonoBehaviour
     public float damageInterval = 1f;
     public float damagePerTick = 5f;
 
+    [Header("Debug")]
+    public bool enableDebugLogs = false;
+
     private float lastDamageTimeToPlayer;
     private float lastDamageTimeToGenerator;
 
     private void OnTriggerStay(Collider other)
     {
-        Debug.Log($"💥 Trigger stay by: {other.name} (Tag: {other.tag})");
+        if (enableDebugLogs)
+            Debug.Log($"💥 Trigger stay by: {other.name} (Tag: {other.tag})");
 
         // ✅ Damage the Player
         if (other.CompareTag("Player"))
@@ -19,11 +23,11 @@ public class EnemyDamageTrigger : MonoBehaviour
             PlayerStats playerStats = other.GetComponentInParent<PlayerStats>();
             if (playerStats != null && Time.time - lastDamageTimeToPlayer >= damageInterval)
             {
-                Debug.Log("✅ Damaging Player");
+                if (enableDebugLogs) Debug.Log("✅ Damaging Player");
                 playerStats.TakeDamage(damagePerTick);
                 lastDamageTimeToPlayer = Time.time;
             }
-            else if (playerStats == null)
+            else if (playerStats == null && enableDebugLogs)
             {
                 Debug.LogWarning("❌ PlayerStats not found!");
             }
@@ -35,11 +39,11 @@ public class EnemyDamageTrigger : MonoBehaviour
             Generator generator = other.GetComponentInParent<Generator>();
             if (generator != null && Time.time - lastDamageTimeToGenerator >= damageInterval)
             {
-                Debug.Log("✅ Damaging Generator");
+                if (enableDebugLogs) Debug.Log("✅ Damaging Generator");
                 generator.TakeDamage(damagePerTick);
                 lastDamageTimeToGenerator = Time.time;
             }
-            else if (generator == null)
+            else if (generator == null && enableDebugLogs)
             {
                 Debug.LogWarning("❌ Generator not found in GeneratorZone parent!");
             }

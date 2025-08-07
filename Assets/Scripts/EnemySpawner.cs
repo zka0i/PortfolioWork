@@ -33,6 +33,10 @@ public class EnemySpawner : MonoBehaviour
 
     public bool AllEnemiesDefeated => spawningStopped && activeEnemies.Count == 0;
 
+    // Optimization: Check cleanup only every few seconds
+    private float cleanupTimer = 0f;
+    private const float cleanupInterval = 2f;
+
     void Start()
     {
         timer = spawnDuration;
@@ -62,13 +66,20 @@ public class EnemySpawner : MonoBehaviour
             }
         }
 
-        activeEnemies.RemoveAll(enemy => enemy == null);
+        // Cleanup dead enemies every few seconds instead of every frame
+        cleanupTimer += Time.deltaTime;
+        if (cleanupTimer >= cleanupInterval)
+        {
+            cleanupTimer = 0f;
+            CleanupNullEnemies();
+        }
 
         if (spawningStopped)
         {
             if (AllEnemiesDefeated)
             {
-                remainingEnemiesText.text = "All enemies defeated!";
+                if (remainingEnemiesText != null)
+                    remainingEnemiesText.text = "All enemies defeated!";
             }
             else
             {
@@ -84,16 +95,15 @@ public class EnemySpawner : MonoBehaviour
         Transform spawnPoint = spawnPoints[currentSpawnIndex];
         GameObject enemy = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
 
-        // Apply speed multiplier if enemy has EnemyMovement component
+        // Apply speed multiplier
         EnemyMovement movement = enemy.GetComponent<EnemyMovement>();
         if (movement != null)
         {
             movement.ApplySpeedMultiplier(enemySpeedMultiplier);
         }
 
-        // Ensure audio
-        AudioSource audio = enemy.GetComponent<AudioSource>();
-        if (audio == null)
+        // Avoid adding audio repeatedly (expensive)
+        if (!enemy.TryGetComponent(out AudioSource audio))
         {
             audio = enemy.AddComponent<AudioSource>();
             audio.playOnAwake = false;
@@ -101,6 +111,15 @@ public class EnemySpawner : MonoBehaviour
 
         activeEnemies.Add(enemy);
         currentSpawnIndex = (currentSpawnIndex + 1) % spawnPoints.Count;
+    }
+
+    void CleanupNullEnemies()
+    {
+        for (int i = activeEnemies.Count - 1; i >= 0; i--)
+        {
+            if (activeEnemies[i] == null)
+                activeEnemies.RemoveAt(i);
+        }
     }
 
     void UpdateTimerUI()
@@ -174,7 +193,6 @@ public class EnemySpawner : MonoBehaviour
 
             float duration = 2f;
             float t = 0f;
-            Color initialColor = nightBackground.color;
 
             while (t < duration)
             {

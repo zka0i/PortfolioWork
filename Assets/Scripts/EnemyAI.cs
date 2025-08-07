@@ -11,6 +11,9 @@ public class EnemyAI : MonoBehaviour
     public float detectionRadius = 5f;
     public float fieldOfViewAngle = 90f;
 
+    [Header("Debug")]
+    public bool enableDebugLogs = false;
+
     private NavMeshAgent agent;
     private bool playerVisible;
 
@@ -39,15 +42,23 @@ public class EnemyAI : MonoBehaviour
 
         if (playerVisible)
         {
-            Debug.Log($"{gameObject.name} ➤ Chasing PLAYER");
+            if (enableDebugLogs)
+                Debug.Log($"{gameObject.name} ➤ Chasing PLAYER");
+
             agent.SetDestination(player.position);
-            Debug.DrawLine(transform.position, player.position, Color.red);
+
+            if (enableDebugLogs)
+                Debug.DrawLine(transform.position, player.position, Color.red);
         }
         else
         {
-            Debug.Log($"{gameObject.name} ➤ Chasing GENERATOR");
+            if (enableDebugLogs)
+                Debug.Log($"{gameObject.name} ➤ Chasing GENERATOR");
+
             agent.SetDestination(generator.transform.position);
-            Debug.DrawLine(transform.position, generator.transform.position, Color.green);
+
+            if (enableDebugLogs)
+                Debug.DrawLine(transform.position, generator.transform.position, Color.green);
         }
     }
 
