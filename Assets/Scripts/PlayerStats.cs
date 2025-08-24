@@ -91,8 +91,19 @@ public class PlayerStats : MonoBehaviour
         isDead = true;
         Debug.Log("💀 Player has died.");
 
-        // Add custom game over / respawn logic here
-        // For example: disable movement, show game over screen, etc.
+        // Disable movement if available
+        if (movement != null)
+            movement.enabled = false;
+
+        // Trigger Game Over via GameManager
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SendMessage("ShowLoseScreen");
+        }
+        else
+        {
+            Debug.LogWarning("❌ GameManager instance not found!");
+        }
     }
 
     public void Heal(float amount)

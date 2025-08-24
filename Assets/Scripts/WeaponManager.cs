@@ -16,16 +16,22 @@ public class WeaponManager : MonoBehaviour
     private int currentIndex = -1;
 
     private int[] weaponAmmo;
+    private int[] weaponReserveAmmo; // ✅ store reserve ammo
     private bool disableSwitching = false;
 
     void Start()
     {
         weaponAmmo = new int[weaponPrefabs.Length];
+        weaponReserveAmmo = new int[weaponPrefabs.Length];
 
-        for (int i = 0; i < weaponAmmo.Length; i++)
+        for (int i = 0; i < weaponPrefabs.Length; i++)
         {
             var wpn = weaponPrefabs[i].GetComponent<Weapon>();
-            if (wpn != null) weaponAmmo[i] = wpn.maxAmmo;
+            if (wpn != null)
+            {
+                weaponAmmo[i] = wpn.maxAmmo;              // start full mag
+                weaponReserveAmmo[i] = wpn.maxReserveAmmo; // start full reserve
+            }
         }
 
         EquipWeapon(0);
@@ -45,9 +51,10 @@ public class WeaponManager : MonoBehaviour
 
         if (currentWeapon != null)
         {
-            // Stop reload properly
+            // Save ammo before switching
             currentWeapon.CancelReload();
             weaponAmmo[currentIndex] = currentWeapon.currentAmmo;
+            weaponReserveAmmo[currentIndex] = currentWeapon.reserveAmmo; // ✅ save reserve
         }
 
         if (currentWeaponObject != null)
@@ -58,7 +65,10 @@ public class WeaponManager : MonoBehaviour
         currentWeaponObject.transform.localRotation = Quaternion.identity;
 
         currentWeapon = currentWeaponObject.GetComponent<Weapon>();
+
+        // ✅ Restore ammo values
         currentWeapon.currentAmmo = weaponAmmo[index];
+        currentWeapon.reserveAmmo = weaponReserveAmmo[index];
 
         currentIndex = index;
 

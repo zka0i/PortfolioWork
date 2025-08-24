@@ -85,8 +85,12 @@ public class Weapon : MonoBehaviour
         if (muzzleFlashLight != null) muzzleFlashLight.enabled = false;
         if (muzzleFlashRenderer != null) muzzleFlashRenderer.enabled = false;
 
-        if (currentAmmo <= 0) currentAmmo = maxAmmo;
-        reserveAmmo = maxReserveAmmo;
+        // ✅ Initialize only if values haven't been set by WeaponManager
+        if (currentAmmo == 0)
+            currentAmmo = maxAmmo;
+
+        // ❌ Removed resetting reserveAmmo here so it persists across switches
+        // if (reserveAmmo == 0) reserveAmmo = maxReserveAmmo;
 
         PlayEquipAnimation();
     }
