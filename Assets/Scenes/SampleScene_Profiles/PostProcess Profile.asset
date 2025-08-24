@@ -12,25 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3f6f3f7c722b4544b97e3c75840aa33, type: 3}
   m_Name: AutoExposure
   m_EditorClassIdentifier: 
-  active: 0
+  active: 1
   enabled:
     overrideState: 1
     value: 1
   filtering:
-    overrideState: 0
-    value: {x: 50, y: 95}
+    overrideState: 1
+    value: {x: 17.703695, y: 62.703705}
   minLuminance:
-    overrideState: 0
-    value: 0
+    overrideState: 1
+    value: -0.3
   maxLuminance:
-    overrideState: 0
-    value: 0
+    overrideState: 1
+    value: 5.9
   keyValue:
     overrideState: 0
     value: 1
   eyeAdaptation:
-    overrideState: 0
-    value: 0
+    overrideState: 1
+    value: 1
   speedUp:
     overrideState: 0
     value: 2
@@ -148,31 +148,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40b924e2dad56384a8df2a1e111bb675, type: 3}
   m_Name: Vignette
   m_EditorClassIdentifier: 
-  active: 0
+  active: 1
   enabled:
     overrideState: 1
     value: 1
   mode:
-    overrideState: 0
+    overrideState: 1
     value: 0
   color:
-    overrideState: 0
+    overrideState: 1
     value: {r: 0, g: 0, b: 0, a: 1}
   center:
-    overrideState: 0
+    overrideState: 1
     value: {x: 0.5, y: 0.5}
   intensity:
-    overrideState: 0
-    value: 0
+    overrideState: 1
+    value: 0.321
   smoothness:
-    overrideState: 0
-    value: 0.2
+    overrideState: 1
+    value: 0.234
   roundness:
-    overrideState: 0
-    value: 1
+    overrideState: 1
+    value: 0.648
   rounded:
-    overrideState: 0
-    value: 0
+    overrideState: 1
+    value: 1
   mask:
     overrideState: 0
     value: {fileID: 0}
@@ -369,15 +369,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b94fcd11afffcb142908bfcb1e261fba, type: 3}
   m_Name: MotionBlur
   m_EditorClassIdentifier: 
-  active: 0
+  active: 1
   enabled:
     overrideState: 1
     value: 1
   shutterAngle:
-    overrideState: 0
-    value: 270
+    overrideState: 1
+    value: 360
   sampleCount:
-    overrideState: 0
+    overrideState: 1
     value: 10
 --- !u!114 &8833996708728712355
 MonoBehaviour:
