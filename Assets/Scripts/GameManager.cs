@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour
 
     [Header("References")]
     public EnemySpawner enemySpawner;
-    public Generator generator;
+    public Generator[] generators; // ✅ now supports multiple generators
     public PlayerMovement playerMovement;
     public Weapon weapon;
     public MonoBehaviour cameraLookScript;
@@ -91,7 +91,18 @@ public class GameManager : MonoBehaviour
     {
         if (gameEnded) return;
 
-        if (generator == null || generator.IsDestroyed)
+        // ✅ Check all generators
+        bool allDestroyed = true;
+        foreach (var gen in generators)
+        {
+            if (gen != null && !gen.IsDestroyed)
+            {
+                allDestroyed = false;
+                break;
+            }
+        }
+
+        if (allDestroyed)
         {
             ShowLoseScreen();
             return;

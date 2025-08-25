@@ -5,7 +5,7 @@ public class EnemyAI : MonoBehaviour
 {
     [Header("Target References")]
     public Transform player;
-    public Generator generator;
+    public Generator[] generators; // ✅ multiple generators
 
     [Header("Detection Settings")]
     public float detectionRadius = 5f;
@@ -28,15 +28,15 @@ public class EnemyAI : MonoBehaviour
                 player = playerObj.transform;
         }
 
-        if (generator == null)
+        if (generators == null || generators.Length == 0)
         {
-            generator = FindObjectOfType<Generator>();
+            generators = FindObjectsOfType<Generator>();
         }
     }
 
     void Update()
     {
-        if (agent == null || player == null || generator == null) return;
+        if (agent == null || player == null) return;
 
         playerVisible = IsPlayerVisible();
 
@@ -52,14 +52,39 @@ public class EnemyAI : MonoBehaviour
         }
         else
         {
-            if (enableDebugLogs)
-                Debug.Log($"{gameObject.name} ➤ Chasing GENERATOR");
+            Generator targetGen = GetNearestAliveGenerator();
+            if (targetGen != null)
+            {
+                if (enableDebugLogs)
+                    Debug.Log($"{gameObject.name} ➤ Chasing GENERATOR");
 
-            agent.SetDestination(generator.transform.position);
+                agent.SetDestination(targetGen.transform.position);
 
-            if (enableDebugLogs)
-                Debug.DrawLine(transform.position, generator.transform.position, Color.green);
+                if (enableDebugLogs)
+                    Debug.DrawLine(transform.position, targetGen.transform.position, Color.green);
+            }
         }
+    }
+
+    Generator GetNearestAliveGenerator()
+    {
+        Generator nearest = null;
+        float nearestDist = Mathf.Infinity;
+
+        foreach (var gen in generators)
+        {
+            if (gen != null && !gen.IsDestroyed)
+            {
+                float dist = Vector3.Distance(transform.position, gen.transform.position);
+                if (dist < nearestDist)
+                {
+                    nearestDist = dist;
+                    nearest = gen;
+                }
+            }
+        }
+
+        return nearest;
     }
 
     bool IsPlayerVisible()
@@ -74,7 +99,6 @@ public class EnemyAI : MonoBehaviour
         if (angle > fieldOfViewAngle * 0.5f)
             return false;
 
-        // ✅ Ignore "PlayerTrigger" layer in this raycast
         int layerMask = ~(1 << LayerMask.NameToLayer("PlayerTrigger"));
 
         Ray ray = new Ray(transform.position + Vector3.up, dirToPlayer.normalized);

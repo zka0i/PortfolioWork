@@ -834,7 +834,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
-  generator: {fileID: 0}
+  generators: []
   detectionRadius: 35
   fieldOfViewAngle: 180
   enableDebugLogs: 0
