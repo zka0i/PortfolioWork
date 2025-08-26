@@ -11,6 +11,7 @@ public class EnemyDamageTrigger : MonoBehaviour
 
     private float lastDamageTimeToPlayer;
     private float lastDamageTimeToGenerator;
+    private float lastDamageTimeToBarbedWire;
 
     private void OnTriggerStay(Collider other)
     {
@@ -46,6 +47,22 @@ public class EnemyDamageTrigger : MonoBehaviour
             else if (generator == null && enableDebugLogs)
             {
                 Debug.LogWarning("❌ Generator not found in GeneratorZone parent!");
+            }
+        }
+
+        // ✅ Damage the BarbedWire
+        else if (other.CompareTag("BarbedWire"))
+        {
+            BarbedWire wire = other.GetComponent<BarbedWire>();
+            if (wire != null && Time.time - lastDamageTimeToBarbedWire >= damageInterval)
+            {
+                if (enableDebugLogs) Debug.Log("✅ Damaging BarbedWire");
+                wire.TakeDamage(damagePerTick);
+                lastDamageTimeToBarbedWire = Time.time;
+            }
+            else if (wire == null && enableDebugLogs)
+            {
+                Debug.LogWarning("❌ BarbedWire component not found!");
             }
         }
     }

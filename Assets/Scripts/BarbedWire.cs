@@ -21,7 +21,7 @@ public class BarbedWire : MonoBehaviour
         currentHealth = maxHealth;
     }
 
-    // 🩸 Called by EnemyDamageTrigger
+    // 🩸 Called when BarbedWire itself takes damage
     public void TakeDamage(float amount)
     {
         if (IsDestroyed) return;
@@ -87,7 +87,12 @@ public class BarbedWire : MonoBehaviour
             float lastTime = damageTimers[enemy];
             if (Time.time - lastTime >= 1f)
             {
+                // Enemy takes damage
                 enemy.TakeDamage(damagePerSecond);
+
+                // BarbedWire ALSO takes damage from enemy pushing through
+                TakeDamage(1f); // ⚡ each tick damages the wire too (tune this value)
+
                 damageTimers[enemy] = Time.time;
                 Debug.Log($"🔥 BarbedWire dealt {damagePerSecond} damage to: {enemy.name}");
             }

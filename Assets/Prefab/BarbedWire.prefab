@@ -211,4 +211,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slowMultiplier: 0.1
   damagePerSecond: 5
-  maxHealth: 1
+  maxHealth: 40
