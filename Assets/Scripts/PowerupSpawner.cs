@@ -17,7 +17,8 @@ public class PowerupSpawner : MonoBehaviour
     public GameObject medkitPrefab;
     public GameObject bandagePrefab;
     public GameObject energyDrinkPrefab;
-    public GameObject ammoBoxPrefab; // ✅ New ammo box prefab
+    public GameObject ammoBoxPrefab;
+    public GameObject barbedWirePrefab; // ✅ New Barbed Wire pickup
 
     [Header("Spawn Settings")]
     public float respawnDelay = 20f;
@@ -91,10 +92,11 @@ public class PowerupSpawner : MonoBehaviour
     {
         float roll = Random.value;
 
-        if (roll < 0.3f) return bandagePrefab;
-        else if (roll < 0.6f) return energyDrinkPrefab;
-        else if (roll < 0.9f) return ammoBoxPrefab; // ✅ 30% chance for ammo box
-        else return medkitPrefab; // ✅ 10% chance for extra medkit (not the guaranteed one)
+        if (roll < 0.25f) return bandagePrefab;       // 25%
+        else if (roll < 0.5f) return energyDrinkPrefab; // 25%
+        else if (roll < 0.7f) return ammoBoxPrefab;     // 20%
+        else if (roll < 0.9f) return barbedWirePrefab;  // ✅ 20% chance Barbed Wire
+        else return medkitPrefab;                      // 10%
     }
 
     void Shuffle(List<int> list)

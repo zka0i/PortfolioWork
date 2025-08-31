@@ -23,17 +23,30 @@ public class BarbedWirePickup : MonoBehaviour
         if (highlightObject != null)
             highlightObject.SetActive(false);
 
-        player = GameObject.FindGameObjectWithTag("Player")?.transform;
-        if (player != null)
-            playerAudio = player.GetComponent<AudioSource>();
+        // ✅ Find player
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            player = playerObj.transform;
 
-        if (playerAudio == null && player != null)
-            playerAudio = player.gameObject.AddComponent<AudioSource>();
+            // ✅ Auto-assign WeaponBuildTool if not set manually
+            if (buildTool == null)
+            {
+                buildTool = playerObj.GetComponent<WeaponBuildTool>();
+                if (buildTool == null)
+                    Debug.LogWarning("❌ No WeaponBuildTool found on Player!");
+            }
+
+            // ✅ Ensure AudioSource exists
+            playerAudio = playerObj.GetComponent<AudioSource>();
+            if (playerAudio == null)
+                playerAudio = playerObj.AddComponent<AudioSource>();
+        }
     }
 
     void Update()
     {
-        if (player == null) return;
+        if (player == null || cam == null) return;
 
         Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
 
@@ -44,17 +57,16 @@ public class BarbedWirePickup : MonoBehaviour
                 if (highlightObject != null)
                     highlightObject.SetActive(true);
 
-                if (Input.GetKeyDown(KeyCode.E))
+                if (Input.GetKeyDown(KeyCode.E) && buildTool != null)
                 {
+                    // ✅ Safely add barbed wire placements
                     buildTool.AddPlacement(prefabIndex, amount);
 
-                    // Play pickup sound from player's AudioSource
                     if (pickupSound != null && playerAudio != null)
                         playerAudio.PlayOneShot(pickupSound, pickupVolume);
 
                     Destroy(gameObject);
                 }
-
                 return;
             }
         }
