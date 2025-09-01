@@ -270,7 +270,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 100
-  damageAmount: 50
+  damageAmount: 10
   damageInterval: 1
   lastDamageTime: 0
   audioSource: {fileID: 0}

@@ -1,0 +1,204 @@
+newmtl Charginghandle1Mtl
+Material Color
+Ka 1 1 1
+Kd 1 1 1
+Ks 0.396078 0.396078 0.396078 
+
+d 1
+
+Ns 0
+
+map_Ka Charginghandle1_diff.png
+map_Kd Charginghandle1_diff.png
+map_d Charginghandle1_diff.png
+
+newmtl Propellermount1Mtl
+Material Color
+Ka 1 1 1
+Kd 1 1 1
+Ks 0.396078 0.396078 0.396078 
+
+d 1
+
+Ns 0
+
+map_Ka Propellermount1_diff.png
+map_Kd Propellermount1_diff.png
+map_d Propellermount1_diff.png
+
+newmtl Body1Mtl
+Material Color
+Ka 1 1 1
+Kd 1 1 1
+Ks 0.396078 0.396078 0.396078 
+
+d 1
+
+Ns 0
+
+map_Ka Body1_diff.png
+map_Kd Body1_diff.png
+map_d Body1_diff.png
+
+newmtl Propeller1Mtl
+Material Color
+Ka 0.00902149 0.00902149 0.00902149
+Kd 0.00902149 0.00902149 0.00902149
+Ks 0.00357322 0.00357322 0.00357322 
+
+d 1
+
+Ns 0
+
+newmtl Box1Mtl
+Material Color
+Ka 0.0414519 0.0619075 0.0399472
+Kd 0.0414519 0.0619075 0.0399472
+Ks 0.0164182 0.0245202 0.0158222 
+
+d 1
+
+Ns 0
+
+newmtl Lid1Mtl
+Material Color
+Ka 0.0050282 0.0050282 0.00552174
+Kd 0.0050282 0.0050282 0.00552174
+Ks 0.00199156 0.00199156 0.00218704 
+
+d 1
+
+Ns 0
+
+newmtl Bullets1Mtl
+Material Color
+Ka 1 1 1
+Kd 1 1 1
+Ks 0.396078 0.396078 0.396078 
+
+d 1
+
+Ns 0
+
+map_Ka Bullets1_diff.png
+map_Kd Bullets1_diff.png
+map_d Bullets1_diff.png
+
+newmtl Base1Mtl
+Material Color
+Ka 0.0869013 0.108711 0.0802193
+Kd 0.0869013 0.108711 0.0802193
+Ks 0.0344197 0.0430581 0.0317731 
+
+d 1
+
+Ns 0
+
+newmtl Pin1Mtl
+Material Color
+Ka 0.0677246 0.0677246 0.0677246
+Kd 0.0677246 0.0677246 0.0677246
+Ks 0.0268243 0.0268243 0.0268243 
+
+d 1
+
+Ns 0
+
+newmtl Lightsside1Mtl
+Material Color
+Ka 0.804559 0.306635 0.0962661
+Kd 0.804559 0.306635 0.0962661
+Ks 0.318669 0.121451 0.0381289 
+
+d 1
+
+Ns 0
+
+newmtl Exhaust1Mtl
+Material Color
+Ka 0.0581872 0.0581872 0.0600316
+Kd 0.0581872 0.0581872 0.0600316
+Ks 0.0230467 0.0230467 0.0237772 
+
+d 1
+
+Ns 0
+
+newmtl Doorwindows1Mtl
+Material Color
+Ka 0.00969633 0.00969633 0.00969633
+Kd 0.00969633 0.00969633 0.00969633
+Ks 0.00384051 0.00384051 0.00384051 
+
+d 0.301961
+
+Ns 0
+
+newmtl Skids1Mtl
+Material Color
+Ka 0.0209511 0.0209511 0.0209511
+Kd 0.0209511 0.0209511 0.0209511
+Ks 0.00829829 0.00829829 0.00829829 
+
+d 1
+
+Ns 0
+
+newmtl Floor1Mtl
+Material Color
+Ka 0.373615 0.368591 0.383775
+Kd 0.373615 0.368591 0.383775
+Ks 0.0732579 0.0722727 0.0752499 
+
+d 1
+
+Ns 255
+
+map_Bump Floor1_nmap.png
+
+map_Ns Floor1_spec.png
+
+newmtl Lightdorsal1Mtl
+Material Color
+Ka 0.383775 0.0289912 0.0289912
+Kd 0.383775 0.0289912 0.0289912
+Ks 0.152005 0.0114828 0.0114828 
+
+d 1
+
+Ns 0
+
+newmtl Seats1Mtl
+Material Color
+Ka 0.0638149 0.0802193 0.0581872
+Kd 0.0638149 0.0802193 0.0581872
+Ks 0.0252757 0.0317731 0.0230467 
+
+d 1
+
+Ns 0
+
+newmtl Lightposterior1Mtl
+Material Color
+Ka 0.645555 0.645555 0.645555
+Kd 0.645555 0.645555 0.645555
+Ks 0.255691 0.255691 0.255691 
+
+d 1
+
+Ns 0
+
+newmtl Dash1Mtl
+Material Color
+Ka 1 1 1
+Kd 1 1 1
+Ks 0.396078 0.396078 0.396078 
+
+d 1
+
+Ns 0
+
+map_Ka Dash1_diff.png
+map_Kd Dash1_diff.png
+map_d Dash1_diff.png
+
