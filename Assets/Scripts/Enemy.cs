@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
+using System.Collections;
 
 public class Enemy : MonoBehaviour
 {
@@ -33,6 +33,17 @@ public class Enemy : MonoBehaviour
 
         enemyMovement = GetComponent<EnemyMovement>();
         EnemyRegistry.Register(this);
+
+        // ✅ Ensure AudioSource exists immediately
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+                audioSource.playOnAwake = false;
+            }
+        }
     }
 
     private void OnDestroy()
@@ -44,17 +55,13 @@ public class Enemy : MonoBehaviour
     {
         currentHealth = maxHealth;
 
-        if (audioSource == null)
+        // ✅ Start groan independently for this enemy
+        if (audioSource != null && ZombieSoundManager.Instance != null)
         {
-            audioSource = GetComponent<AudioSource>();
-            if (audioSource == null && enableDebugLogs)
-            {
-                Debug.LogWarning("❌ No AudioSource found on this enemy.");
-            }
+            ZombieSoundManager.Instance.RequestGroanNonBlocking(audioSource, enableDebugLogs);
         }
     }
 
-    // 🔫 Normal damage from bullets (plays sound)
     public void TakeDamage(float amount, bool isHeadshot = false)
     {
         if (isDying) return;
@@ -87,7 +94,6 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    // ⚠️ Silent damage (e.g., from barbed wire) — NO audio
     public void TakeDamage(float amount)
     {
         if (isDying) return;
@@ -132,26 +138,15 @@ public class Enemy : MonoBehaviour
     public void ApplySpeedMultiplier(float multiplier)
     {
         if (enemyMovement != null)
-        {
             enemyMovement.ApplySpeedMultiplier(multiplier);
-        }
     }
 
     public void ResetSpeedMultiplier()
     {
         if (enemyMovement != null)
-        {
             enemyMovement.ResetSpeedMultiplier();
-        }
     }
 
-    public bool IsDead()
-    {
-        return isDying;
-    }
-
-    public bool IsDying()
-    {
-        return isDying;
-    }
+    public bool IsDead() => isDying;
+    public bool IsDying() => isDying;
 }

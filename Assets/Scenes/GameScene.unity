@@ -163493,6 +163493,59 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 650d23d61e281d748a5687db6574d464, type: 3}
+--- !u!1 &840421595
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 840421597}
+  - component: {fileID: 840421596}
+  m_Layer: 0
+  m_Name: ZombieSoundManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &840421596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 840421595}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a89750cdb1c856479ec9868c8b3d2e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  zombieClips:
+  - {fileID: 8300000, guid: 7869d538a3dbcff449bde24955c31e37, type: 3}
+  - {fileID: 8300000, guid: 34f835d561f20d34e8ef91b47299d599, type: 3}
+  - {fileID: 8300000, guid: 54bffb9d0fd4fd34c839454fcf9bad9a, type: 3}
+  - {fileID: 8300000, guid: a7c096eb33e42654baf5a6692cf6a026, type: 3}
+  maxConcurrentSounds: 3
+  minDelayBetweenGroans: 3
+  maxDelayBetweenGroans: 8
+  volume: 0.7
+--- !u!4 &840421597
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 840421595}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 24.817497, y: 6.666033, z: 1.5253448}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &840429071 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 881627770171479611, guid: 03c623e48141b2c409fa08d82af9530f, type: 3}
@@ -239317,10 +239370,10 @@ MonoBehaviour:
   playerMovement: {fileID: 1992521849}
   weapon: {fileID: 0}
   cameraLookScript: {fileID: 1992521849}
-  baseSpawnRateMultiplier: 1.5
-  spawnRateGrowthPerNight: 1
-  baseEnemySpeedMultiplier: 1
-  speedGrowthPerNight: 1.5
+  baseSpawnRateMultiplier: 2
+  spawnRateGrowthPerNight: 1.5
+  baseEnemySpeedMultiplier: 1.5
+  speedGrowthPerNight: 2
   helicopterPrefab: {fileID: 8950572970915421140, guid: 148f66c6ce6e8204eb9e426e37220d90, type: 3}
   helicopterSpawnPoint: {fileID: 909129262}
   helicopterLandingPoint: {fileID: 2093305519}
@@ -405947,3 +406000,4 @@ SceneRoots:
   - {fileID: 861730962}
   - {fileID: 1951002667}
   - {fileID: 1081325054}
+  - {fileID: 840421597}
