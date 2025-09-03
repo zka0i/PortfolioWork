@@ -11,14 +11,17 @@ public class PowerupSpawner : MonoBehaviour
         [HideInInspector] public GameObject currentPowerup;
     }
 
+    [System.Serializable]
+    public class PowerupEntry
+    {
+        public GameObject prefab;   // Prefab of powerup (can be null = empty)
+        [Range(0f, 100f)] public float weight = 10f; // Rarity percentage weight
+    }
+
     public SpawnPoint[] spawnPoints;
 
-    [Header("Powerup Prefabs")]
-    public GameObject medkitPrefab;
-    public GameObject bandagePrefab;
-    public GameObject energyDrinkPrefab;
-    public GameObject ammoBoxPrefab;
-    public GameObject barbedWirePrefab; // ✅ New Barbed Wire pickup
+    [Header("Powerup Table")]
+    public List<PowerupEntry> powerupTable = new List<PowerupEntry>();
 
     [Header("Spawn Settings")]
     public float respawnDelay = 20f;
@@ -34,35 +37,31 @@ public class PowerupSpawner : MonoBehaviour
         for (int i = 0; i < spawnPoints.Length; i++)
             allIndexes.Add(i);
 
-        // Ensure one medkit
-        int medkitIndex = allIndexes[Random.Range(0, allIndexes.Count)];
-        SpawnPowerupAt(medkitIndex, medkitPrefab);
-        allIndexes.Remove(medkitIndex);
-
-        // Calculate how many spawns must remain empty
-        int minEmpty = Mathf.Max(2, spawnPoints.Length / 5); // 20% minimum, at least 2
-
-        int maxPowerups = spawnPoints.Length - minEmpty - 1; // already placed 1 medkit
-        int powerupsToSpawn = Mathf.Min(maxPowerups, allIndexes.Count);
-
-        // Shuffle list
+        // Shuffle spawn point list
         Shuffle(allIndexes);
 
-        for (int i = 0; i < powerupsToSpawn; i++)
+        foreach (int index in allIndexes)
         {
-            int index = allIndexes[i];
             GameObject prefabToSpawn = GetRandomPowerup();
-            SpawnPowerupAt(index, prefabToSpawn);
+            if (prefabToSpawn != null)
+            {
+                SpawnPowerupAt(index, prefabToSpawn);
+            }
         }
-
-        // Remaining slots will be empty
     }
 
     void SpawnPowerupAt(int index, GameObject prefab)
     {
-        if (index < 0 || index >= spawnPoints.Length || prefab == null) return;
+        if (index < 0 || index >= spawnPoints.Length) return;
 
         Transform spawnLoc = spawnPoints[index].location;
+
+        if (prefab == null)
+        {
+            spawnPoints[index].currentPowerup = null;
+            return;
+        }
+
         GameObject spawned = Instantiate(prefab, spawnLoc.position, spawnLoc.rotation);
         spawnPoints[index].currentPowerup = spawned;
 
@@ -90,13 +89,23 @@ public class PowerupSpawner : MonoBehaviour
 
     GameObject GetRandomPowerup()
     {
-        float roll = Random.value;
+        if (powerupTable.Count == 0) return null;
 
-        if (roll < 0.25f) return bandagePrefab;       // 25%
-        else if (roll < 0.5f) return energyDrinkPrefab; // 25%
-        else if (roll < 0.7f) return ammoBoxPrefab;     // 20%
-        else if (roll < 0.9f) return barbedWirePrefab;  // ✅ 20% chance Barbed Wire
-        else return medkitPrefab;                      // 10%
+        float totalWeight = 0f;
+        foreach (var entry in powerupTable)
+            totalWeight += entry.weight;
+
+        float roll = Random.Range(0f, totalWeight);
+        float cumulative = 0f;
+
+        foreach (var entry in powerupTable)
+        {
+            cumulative += entry.weight;
+            if (roll <= cumulative)
+                return entry.prefab; // prefab can be null = empty spawn
+        }
+
+        return null;
     }
 
     void Shuffle(List<int> list)

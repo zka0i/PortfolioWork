@@ -44,6 +44,18 @@ public class BarbedWire : MonoBehaviour
         IsDestroyed = true;
         Debug.Log("💥 BarbedWire destroyed!");
 
+        // ✅ Restore all slowed enemies before destroying
+        foreach (var pair in slowedAgents)
+        {
+            if (pair.Key != null)
+            {
+                pair.Key.speed = pair.Value;
+                Debug.Log($"🏃 Restored {pair.Key.name} speed to {pair.Value} (wire destroyed)");
+            }
+        }
+        slowedAgents.Clear();
+        damageTimers.Clear();
+
         // Disable its collider and visuals
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
