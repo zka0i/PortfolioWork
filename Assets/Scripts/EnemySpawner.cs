@@ -5,8 +5,16 @@ using System.Collections.Generic;
 
 public class EnemySpawner : MonoBehaviour
 {
+    [System.Serializable]
+    public class EnemyVariant
+    {
+        public GameObject prefab;
+        [Range(0f, 100f)] public float baseWeight = 10f; // spawn chance weight
+        [Range(0f, 5f)] public float weightIncreasePerWave = 1f; // how much this variant gets more common each wave
+    }
+
     [Header("Spawn Settings")]
-    public GameObject enemyPrefab;
+    public List<EnemyVariant> enemyVariants = new List<EnemyVariant>();
     public List<Transform> spawnPoints = new List<Transform>();
     public float spawnInterval = 2f;
 
@@ -30,6 +38,7 @@ public class EnemySpawner : MonoBehaviour
     private float spawnCooldown = 0f;
     private List<GameObject> activeEnemies = new List<GameObject>();
     private int currentSpawnIndex = 0;
+    private int currentWave = 1;
 
     public bool AllEnemiesDefeated => spawningStopped && activeEnemies.Count == 0;
 
@@ -90,10 +99,14 @@ public class EnemySpawner : MonoBehaviour
 
     void SpawnEnemy()
     {
-        if (spawnPoints.Count == 0 || enemyPrefab == null) return;
+        if (spawnPoints.Count == 0 || enemyVariants.Count == 0) return;
 
         Transform spawnPoint = spawnPoints[currentSpawnIndex];
-        GameObject enemy = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
+        GameObject prefabToSpawn = GetWeightedEnemyPrefab();
+
+        if (prefabToSpawn == null) return;
+
+        GameObject enemy = Instantiate(prefabToSpawn, spawnPoint.position, spawnPoint.rotation);
 
         // Apply speed multiplier
         EnemyMovement movement = enemy.GetComponent<EnemyMovement>();
@@ -111,6 +124,30 @@ public class EnemySpawner : MonoBehaviour
 
         activeEnemies.Add(enemy);
         currentSpawnIndex = (currentSpawnIndex + 1) % spawnPoints.Count;
+    }
+
+    GameObject GetWeightedEnemyPrefab()
+    {
+        float totalWeight = 0f;
+
+        foreach (var variant in enemyVariants)
+        {
+            totalWeight += variant.baseWeight + (variant.weightIncreasePerWave * (currentWave - 1));
+        }
+
+        float roll = Random.Range(0f, totalWeight);
+        float cumulative = 0f;
+
+        foreach (var variant in enemyVariants)
+        {
+            float effectiveWeight = variant.baseWeight + (variant.weightIncreasePerWave * (currentWave - 1));
+            cumulative += effectiveWeight;
+
+            if (roll <= cumulative)
+                return variant.prefab;
+        }
+
+        return enemyVariants[0].prefab; // fallback
     }
 
     void CleanupNullEnemies()
@@ -180,6 +217,7 @@ public class EnemySpawner : MonoBehaviour
 
     public void StartNewNight(int nightNumber)
     {
+        currentWave = nightNumber; // ✅ track wave for scaling
         StartCoroutine(StartNightTransition(nightNumber));
     }
 
