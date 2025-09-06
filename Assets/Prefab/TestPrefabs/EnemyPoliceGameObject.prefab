@@ -661,6 +661,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ZombieAnim
       objectReference: {fileID: 0}
+    - target: {fileID: 7914649598657330457, guid: 21334c4313743184cab9769116ec4341, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 2ddd19f924dac3e4e9b55026191c0cbb, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
