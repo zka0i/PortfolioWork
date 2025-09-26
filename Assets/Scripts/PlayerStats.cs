@@ -20,11 +20,22 @@ public class PlayerStats : MonoBehaviour
     public float energyDrinkDuration = 10f;
     public float speedBoostMultiplier = 1.5f;
 
+    [Header("Low HP Feedback")]
+    public Image bloodOverlay;                 // Assign a semi-transparent red UI image in Canvas
+    public float fadeSpeed = 2f;
+    public float lowHPThreshold = 30f;         // HP where effects kick in
+    public AudioSource heartbeatSource;        // Heartbeat audio source
+    public AudioClip heartbeatClip;
+    public AudioLowPassFilter lowPassFilter;   // For muffled hearing effect
+    public float muffledCutoff = 800f;         // Low-pass cutoff freq when low HP
+    public float normalCutoff = 22000f;        // Normal hearing cutoff
+
     private PlayerMovement movement;
     private bool isUsingEnergyDrink = false;
     private float originalSprintSpeed;
-
     private bool isDead = false;
+
+    private float bloodTargetAlpha = 0f;       // UI fade target
 
     void Start()
     {
@@ -37,12 +48,28 @@ public class PlayerStats : MonoBehaviour
         movement = GetComponent<PlayerMovement>();
         if (movement != null)
             originalSprintSpeed = movement.sprintSpeed;
+
+        if (bloodOverlay != null)
+        {
+            Color c = bloodOverlay.color;
+            c.a = 0f;
+            bloodOverlay.color = c;
+        }
+
+        if (heartbeatSource != null)
+        {
+            heartbeatSource.clip = heartbeatClip;
+            heartbeatSource.loop = true;
+            heartbeatSource.volume = 0f; // start silent
+            heartbeatSource.playOnAwake = false;
+        }
     }
 
     void Update()
     {
         UpdateUI();
         HandleStamina();
+        HandleLowHPEffects();
     }
 
     void UpdateUI()
@@ -91,11 +118,9 @@ public class PlayerStats : MonoBehaviour
         isDead = true;
         Debug.Log("💀 Player has died.");
 
-        // Disable movement if available
         if (movement != null)
             movement.enabled = false;
 
-        // Trigger Game Over via GameManager
         if (GameManager.Instance != null)
         {
             GameManager.Instance.SendMessage("ShowLoseScreen");
@@ -116,15 +141,8 @@ public class PlayerStats : MonoBehaviour
         Debug.Log($"❤️ Player healed: {amount}. Current HP: {currentHealth}");
     }
 
-    public void UseMedkit()
-    {
-        Heal(maxHealth);
-    }
-
-    public void UseBandage()
-    {
-        Heal(30f);
-    }
+    public void UseMedkit() => Heal(maxHealth);
+    public void UseBandage() => Heal(30f);
 
     public void UseEnergyDrink()
     {
@@ -136,10 +154,49 @@ public class PlayerStats : MonoBehaviour
     {
         isUsingEnergyDrink = true;
         movement.sprintSpeed *= speedBoostMultiplier;
-
         yield return new WaitForSeconds(energyDrinkDuration);
-
         movement.sprintSpeed = originalSprintSpeed;
         isUsingEnergyDrink = false;
+    }
+
+    // === LOW HP EFFECTS ===
+    void HandleLowHPEffects()
+    {
+        bool lowHP = currentHealth > 0 && currentHealth <= lowHPThreshold;
+
+        if (lowHP)
+        {
+            bloodTargetAlpha = Mathf.InverseLerp(maxHealth, 0, currentHealth); // more blood as HP lowers
+            if (heartbeatSource != null && !heartbeatSource.isPlaying)
+                heartbeatSource.Play();
+
+            if (lowPassFilter != null)
+                lowPassFilter.cutoffFrequency = Mathf.Lerp(lowPassFilter.cutoffFrequency, muffledCutoff, Time.deltaTime * fadeSpeed);
+        }
+        else
+        {
+            bloodTargetAlpha = 0f;
+
+            if (lowPassFilter != null)
+                lowPassFilter.cutoffFrequency = Mathf.Lerp(lowPassFilter.cutoffFrequency, normalCutoff, Time.deltaTime * fadeSpeed);
+
+            if (heartbeatSource != null && heartbeatSource.isPlaying && heartbeatSource.volume <= 0.01f)
+                heartbeatSource.Stop();
+        }
+
+        // Fade UI blood overlay
+        if (bloodOverlay != null)
+        {
+            Color c = bloodOverlay.color;
+            c.a = Mathf.Lerp(c.a, bloodTargetAlpha, Time.deltaTime * fadeSpeed);
+            bloodOverlay.color = c;
+        }
+
+        // Fade heartbeat volume
+        if (heartbeatSource != null)
+        {
+            float targetVol = lowHP ? 1f : 0f;
+            heartbeatSource.volume = Mathf.Lerp(heartbeatSource.volume, targetVol, Time.deltaTime * fadeSpeed);
+        }
     }
 }
