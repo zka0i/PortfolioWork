@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.AI;
 
 public class EnemySpawner : MonoBehaviour
 {
@@ -10,7 +11,7 @@ public class EnemySpawner : MonoBehaviour
     {
         public GameObject prefab;
         [Range(0f, 100f)] public float baseWeight = 10f; // spawn chance weight
-        [Range(0f, 5f)] public float weightIncreasePerWave = 1f; // how much this variant gets more common each wave
+        [Range(0f, 5f)] public float weightIncreasePerWave = 1f;
     }
 
     [Header("Spawn Settings")]
@@ -21,6 +22,7 @@ public class EnemySpawner : MonoBehaviour
     [Header("Scaling")]
     [HideInInspector] public float spawnRateMultiplier = 1f;
     [HideInInspector] public float enemySpeedMultiplier = 1f;
+    [HideInInspector] public float enemyDamageMultiplier = 1f; // ✅ added damage scaling
 
     [Header("Timer Settings")]
     public float spawnDuration = 180f;
@@ -42,7 +44,6 @@ public class EnemySpawner : MonoBehaviour
 
     public bool AllEnemiesDefeated => spawningStopped && activeEnemies.Count == 0;
 
-    // Optimization: Check cleanup only every few seconds
     private float cleanupTimer = 0f;
     private const float cleanupInterval = 2f;
 
@@ -75,7 +76,6 @@ public class EnemySpawner : MonoBehaviour
             }
         }
 
-        // Cleanup dead enemies every few seconds instead of every frame
         cleanupTimer += Time.deltaTime;
         if (cleanupTimer >= cleanupInterval)
         {
@@ -108,14 +108,23 @@ public class EnemySpawner : MonoBehaviour
 
         GameObject enemy = Instantiate(prefabToSpawn, spawnPoint.position, spawnPoint.rotation);
 
-        // Apply speed multiplier
-        EnemyMovement movement = enemy.GetComponent<EnemyMovement>();
-        if (movement != null)
+        // ✅ Apply NavMesh speed scaling
+        NavMeshAgent agent = enemy.GetComponent<NavMeshAgent>();
+        if (agent != null)
         {
-            movement.ApplySpeedMultiplier(enemySpeedMultiplier);
+            float baseSpeed = agent.speed; // prefab’s original speed
+            agent.speed = baseSpeed * enemySpeedMultiplier;
         }
 
-        // Avoid adding audio repeatedly (expensive)
+        // ✅ Apply enemy damage scaling
+        Enemy enemyScript = enemy.GetComponent<Enemy>();
+        if (enemyScript != null)
+        {
+            float baseDamage = enemyScript.damageAmount;
+            enemyScript.damageAmount = baseDamage * enemyDamageMultiplier;
+        }
+
+        // Ensure audio exists
         if (!enemy.TryGetComponent(out AudioSource audio))
         {
             audio = enemy.AddComponent<AudioSource>();
@@ -147,7 +156,7 @@ public class EnemySpawner : MonoBehaviour
                 return variant.prefab;
         }
 
-        return enemyVariants[0].prefab; // fallback
+        return enemyVariants[0].prefab;
     }
 
     void CleanupNullEnemies()
@@ -185,10 +194,7 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
-    public bool TimerExpired()
-    {
-        return timer <= 0;
-    }
+    public bool TimerExpired() => timer <= 0;
 
     public void BeginSpawning()
     {
@@ -217,7 +223,7 @@ public class EnemySpawner : MonoBehaviour
 
     public void StartNewNight(int nightNumber)
     {
-        currentWave = nightNumber; // ✅ track wave for scaling
+        currentWave = nightNumber;
         StartCoroutine(StartNightTransition(nightNumber));
     }
 
@@ -227,7 +233,7 @@ public class EnemySpawner : MonoBehaviour
         {
             nightText.text = $"Night {nightNumber}";
             nightTransitionUI.SetActive(true);
-            nightBackground.color = new Color(0f, 0f, 0f, 0.7f); // semi-transparent black
+            nightBackground.color = new Color(0f, 0f, 0f, 0.7f);
 
             float duration = 2f;
             float t = 0f;

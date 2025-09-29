@@ -42,6 +42,7 @@ public class GameManager : MonoBehaviour
     public GameObject helicopterPrefab;
     public Transform helicopterSpawnPoint;
     public Transform helicopterLandingPoint;
+    public Transform helicopterHoverPoint; // ✅ new hover point
     public float helicopterSpeed = 5f;
     public float finalWaveSpawnRateMultiplier = 3f;
 
@@ -63,6 +64,7 @@ public class GameManager : MonoBehaviour
 
     private GameObject activeHelicopter;
     private bool finalWaveTriggered = false;
+    private bool reachedHover = false; // ✅ track helicopter progress
 
     void Awake()
     {
@@ -215,14 +217,38 @@ public class GameManager : MonoBehaviour
 
     void HandleHelicopterMovement()
     {
-        if (activeHelicopter == null || helicopterLandingPoint == null) return;
+        if (activeHelicopter == null) return;
 
         float step = helicopterSpeed * Time.deltaTime;
-        activeHelicopter.transform.position = Vector3.MoveTowards(
-            activeHelicopter.transform.position,
-            helicopterLandingPoint.position,
-            step
-        );
+
+        // ✅ First move to hover point
+        if (!reachedHover && helicopterHoverPoint != null)
+        {
+            activeHelicopter.transform.position = Vector3.MoveTowards(
+                activeHelicopter.transform.position,
+                helicopterHoverPoint.position,
+                step
+            );
+
+            if (Vector3.Distance(activeHelicopter.transform.position, helicopterHoverPoint.position) < 0.5f)
+                reachedHover = true;
+        }
+        else if (helicopterLandingPoint != null)
+        {
+            // ✅ Then descend slowly to landing
+            activeHelicopter.transform.position = Vector3.MoveTowards(
+                activeHelicopter.transform.position,
+                helicopterLandingPoint.position,
+                step * 0.5f // slower descent
+            );
+
+            // ✅ Add subtle helicopter bob
+            activeHelicopter.transform.position += new Vector3(
+                Mathf.Sin(Time.time * 2f) * 0.05f, // left-right sway
+                Mathf.Sin(Time.time * 3f) * 0.02f, // up-down bounce
+                0
+            );
+        }
     }
 
     void HandleNightFade()
@@ -319,13 +345,15 @@ public class GameManager : MonoBehaviour
     {
         float spawnRate = baseSpawnRateMultiplier + (night - 1) * spawnRateGrowthPerNight;
         float speedMult = baseEnemySpeedMultiplier + (night - 1) * speedGrowthPerNight;
+        float damageMult = 1f + (night - 1) * 0.1f; // ✅ new damage scaling (10% per night)
 
         if (enemySpawner != null)
         {
             enemySpawner.spawnRateMultiplier = Mathf.Max(0.2f, spawnRate);
             enemySpawner.enemySpeedMultiplier = speedMult;
+            enemySpawner.enemyDamageMultiplier = damageMult; // ✅ apply to spawner
         }
 
-        Debug.Log($"[DIFFICULTY] Night {night} - Spawn Rate Mult: {spawnRate}, Enemy Speed Mult: {speedMult}");
+        Debug.Log($"[DIFFICULTY] Night {night} - Spawn Rate Mult: {spawnRate}, Enemy Speed Mult: {speedMult}, Enemy Damage Mult: {damageMult}");
     }
 }
