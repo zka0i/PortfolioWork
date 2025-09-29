@@ -26,6 +26,9 @@ public class PowerupSpawner : MonoBehaviour
     [Header("Spawn Settings")]
     public float respawnDelay = 20f;
 
+    // Track which spawn points are "empty"
+    private List<int> emptySpawns = new List<int>();
+
     private void Start()
     {
         InitializeSpawns();
@@ -43,10 +46,7 @@ public class PowerupSpawner : MonoBehaviour
         foreach (int index in allIndexes)
         {
             GameObject prefabToSpawn = GetRandomPowerup();
-            if (prefabToSpawn != null)
-            {
-                SpawnPowerupAt(index, prefabToSpawn);
-            }
+            SpawnPowerupAt(index, prefabToSpawn);
         }
     }
 
@@ -58,7 +58,10 @@ public class PowerupSpawner : MonoBehaviour
 
         if (prefab == null)
         {
+            // Mark this as empty
             spawnPoints[index].currentPowerup = null;
+            if (!emptySpawns.Contains(index))
+                emptySpawns.Add(index);
             return;
         }
 
@@ -72,9 +75,25 @@ public class PowerupSpawner : MonoBehaviour
             pickup.OnPickedUp += () =>
             {
                 spawnPoints[index].currentPowerup = null;
+
+                // When ANY pickup happens, try to fill one empty slot
+                TryFillEmptySlot();
+
+                // Normal respawn
                 StartCoroutine(RespawnAfterDelay(index));
             };
         }
+    }
+
+    void TryFillEmptySlot()
+    {
+        if (emptySpawns.Count == 0) return;
+
+        int emptyIndex = emptySpawns[0]; // Take first empty slot
+        emptySpawns.RemoveAt(0);
+
+        GameObject prefab = GetRandomPowerup();
+        SpawnPowerupAt(emptyIndex, prefab);
     }
 
     IEnumerator RespawnAfterDelay(int index)
