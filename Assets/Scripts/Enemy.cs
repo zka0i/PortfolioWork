@@ -135,6 +135,14 @@ public class Enemy : MonoBehaviour
         Destroy(gameObject, destroyDelay);
     }
 
+    // ✅ Wave/night scaling (global speed multiplier)
+    public void ApplyGlobalSpeedMultiplier(float multiplier)
+    {
+        if (enemyMovement != null)
+            enemyMovement.ApplyGlobalSpeedMultiplier(multiplier);
+    }
+
+    // ✅ Slowdown (barbed wire, traps)
     public void ApplySpeedMultiplier(float multiplier)
     {
         if (enemyMovement != null)

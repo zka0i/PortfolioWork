@@ -6,17 +6,25 @@ public class EnemyMovement : MonoBehaviour
 {
     private NavMeshAgent agent;
     private bool isDead = false;
-    private bool isSlowed = false;
 
     private Enemy enemy;
 
     [HideInInspector] public float originalSpeed;
+    private float globalMultiplier = 1f; // wave/night scaling
+    private float slowMultiplier = 1f;   // barbed wire / trap slowdown
+
+    void Awake()
+    {
+        agent = GetComponent<NavMeshAgent>();
+        if (agent != null)
+            originalSpeed = agent.speed; // IMPORTANT: store base speed in Awake so other scripts can read it early
+        enemy = GetComponent<Enemy>();
+    }
 
     void Start()
     {
-        agent = GetComponent<NavMeshAgent>();
-        originalSpeed = agent.speed;
-        enemy = GetComponent<Enemy>();
+        // ensure starting speed uses base values
+        ApplyFinalSpeed();
     }
 
     void Update()
@@ -26,38 +34,43 @@ public class EnemyMovement : MonoBehaviour
         if (enemy != null && enemy.IsDying())
         {
             isDead = true;
-            agent.isStopped = true;
+            if (agent != null) agent.isStopped = true;
             return;
         }
 
-        // 🛑 DO NOT control SetDestination here — EnemyAI handles that!
+        // NOTE: enemy AI controls SetDestination; movement only controls speed/state
     }
 
-    // 🐌 Apply slowdown (barbed wire etc.)
+    // ✅ Called by spawner / gamemanager to apply wave/global scaling (>1 allowed)
+    public void ApplyGlobalSpeedMultiplier(float multiplier)
+    {
+        if (agent == null || isDead) return;
+        globalMultiplier = Mathf.Max(0.01f, multiplier);
+        ApplyFinalSpeed();
+    }
+
+    // ✅ Slowdown (barbed wire etc.) — multiplier should be <= 1
     public void ApplySpeedMultiplier(float multiplier)
     {
         if (agent == null || isDead) return;
-
-        multiplier = Mathf.Clamp(multiplier, 0.01f, 1f);
-        if (!isSlowed)
-        {
-            agent.speed = originalSpeed * multiplier;
-            isSlowed = true;
-            Debug.Log("🐌 Enemy slowed! New speed: " + agent.speed);
-        }
+        slowMultiplier = Mathf.Clamp(multiplier, 0.01f, 1f);
+        ApplyFinalSpeed();
+        // Debug.Log($"🐌 Slow applied: slowMultiplier={slowMultiplier} finalSpeed={agent.speed}");
     }
 
-    // 🔄 Reset to normal speed
+    // ✅ Reset only the slowdown (restore to the global-scaled speed)
     public void ResetSpeedMultiplier()
     {
         if (agent == null || isDead) return;
+        slowMultiplier = 1f;
+        ApplyFinalSpeed();
+        // Debug.Log($"🏃 Reset slowdown. finalSpeed={agent.speed}");
+    }
 
-        if (isSlowed)
-        {
-            agent.speed = originalSpeed;
-            isSlowed = false;
-            Debug.Log("🏃‍♂️ Enemy speed reset to: " + agent.speed);
-        }
+    private void ApplyFinalSpeed()
+    {
+        if (agent == null || isDead) return;
+        agent.speed = originalSpeed * globalMultiplier * slowMultiplier;
     }
 
     public void StopMovement()

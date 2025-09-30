@@ -85,12 +85,13 @@ public class Weapon : MonoBehaviour
         if (muzzleFlashLight != null) muzzleFlashLight.enabled = false;
         if (muzzleFlashRenderer != null) muzzleFlashRenderer.enabled = false;
 
-        // ✅ Initialize only if values haven't been set by WeaponManager
-        if (currentAmmo == 0)
+        // ✅ Ammo initialization: only for brand new weapon
+        if (!PlayerPrefs.HasKey(weaponName + "_AmmoInitialized"))
+        {
             currentAmmo = maxAmmo;
-
-        // ❌ Removed resetting reserveAmmo here so it persists across switches
-        // if (reserveAmmo == 0) reserveAmmo = maxReserveAmmo;
+            reserveAmmo = maxReserveAmmo;
+            PlayerPrefs.SetInt(weaponName + "_AmmoInitialized", 1);
+        }
 
         PlayEquipAnimation();
     }

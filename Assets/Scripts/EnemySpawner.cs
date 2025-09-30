@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.AI;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.AI;
 
 public class EnemySpawner : MonoBehaviour
 {
@@ -11,7 +11,7 @@ public class EnemySpawner : MonoBehaviour
     {
         public GameObject prefab;
         [Range(0f, 100f)] public float baseWeight = 10f; // spawn chance weight
-        [Range(0f, 5f)] public float weightIncreasePerWave = 1f;
+        [Range(0f, 5f)] public float weightIncreasePerWave = 1f; // how much this variant gets more common each wave
     }
 
     [Header("Spawn Settings")]
@@ -22,7 +22,7 @@ public class EnemySpawner : MonoBehaviour
     [Header("Scaling")]
     [HideInInspector] public float spawnRateMultiplier = 1f;
     [HideInInspector] public float enemySpeedMultiplier = 1f;
-    [HideInInspector] public float enemyDamageMultiplier = 1f; // ✅ added damage scaling
+    [HideInInspector] public float enemyDamageMultiplier = 1f;
 
     [Header("Timer Settings")]
     public float spawnDuration = 180f;
@@ -103,28 +103,26 @@ public class EnemySpawner : MonoBehaviour
 
         Transform spawnPoint = spawnPoints[currentSpawnIndex];
         GameObject prefabToSpawn = GetWeightedEnemyPrefab();
-
         if (prefabToSpawn == null) return;
 
         GameObject enemy = Instantiate(prefabToSpawn, spawnPoint.position, spawnPoint.rotation);
 
-        // ✅ Apply NavMesh speed scaling
+        // ✅ Scale NavMeshAgent speed using EnemyMovement's originalSpeed
         NavMeshAgent agent = enemy.GetComponent<NavMeshAgent>();
-        if (agent != null)
+        EnemyMovement movement = enemy.GetComponent<EnemyMovement>();
+        if (agent != null && movement != null)
         {
-            float baseSpeed = agent.speed; // prefab’s original speed
-            agent.speed = baseSpeed * enemySpeedMultiplier;
+            agent.speed = movement.originalSpeed * enemySpeedMultiplier;
         }
 
-        // ✅ Apply enemy damage scaling
+        // ✅ Scale enemy damage
         Enemy enemyScript = enemy.GetComponent<Enemy>();
         if (enemyScript != null)
         {
-            float baseDamage = enemyScript.damageAmount;
-            enemyScript.damageAmount = baseDamage * enemyDamageMultiplier;
+            enemyScript.damageAmount *= enemyDamageMultiplier;
         }
 
-        // Ensure audio exists
+        // ✅ Ensure audio exists
         if (!enemy.TryGetComponent(out AudioSource audio))
         {
             audio = enemy.AddComponent<AudioSource>();
@@ -138,7 +136,6 @@ public class EnemySpawner : MonoBehaviour
     GameObject GetWeightedEnemyPrefab()
     {
         float totalWeight = 0f;
-
         foreach (var variant in enemyVariants)
         {
             totalWeight += variant.baseWeight + (variant.weightIncreasePerWave * (currentWave - 1));
@@ -156,7 +153,7 @@ public class EnemySpawner : MonoBehaviour
                 return variant.prefab;
         }
 
-        return enemyVariants[0].prefab;
+        return enemyVariants[0].prefab; // fallback
     }
 
     void CleanupNullEnemies()
@@ -194,7 +191,10 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
-    public bool TimerExpired() => timer <= 0;
+    public bool TimerExpired()
+    {
+        return timer <= 0;
+    }
 
     public void BeginSpawning()
     {
