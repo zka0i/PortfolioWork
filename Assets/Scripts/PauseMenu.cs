@@ -1,6 +1,6 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityEngine.Audio;
 
 public class PauseMenu : MonoBehaviour
 {
@@ -9,23 +9,23 @@ public class PauseMenu : MonoBehaviour
     public GameObject settingsPanel;
     public GameObject controlsPanel;
 
-    [Header("Immersive Option")]
+    [Header("Optional UI")]
     public Toggle immersiveToggle;
-    public GameObject[] uiToHideInImmersive;
 
-    [Header("Audio")]
-    public AudioMixer masterMixer;
-
-    private bool isPaused = false;
+    private bool isPaused;
 
     void Start()
     {
-        pauseMenuPanel.SetActive(false);
-        settingsPanel.SetActive(false);
-        controlsPanel.SetActive(false);
+        // Disable all panels on start
+        if (pauseMenuPanel) pauseMenuPanel.SetActive(false);
+        if (settingsPanel) settingsPanel.SetActive(false);
+        if (controlsPanel) controlsPanel.SetActive(false);
 
-        if (immersiveToggle != null)
-            immersiveToggle.onValueChanged.AddListener(OnImmersiveToggleChanged);
+        if (immersiveToggle)
+            immersiveToggle.onValueChanged.AddListener(OnImmersiveToggle);
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     void Update()
@@ -33,72 +33,75 @@ public class PauseMenu : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (isPaused)
-                ResumeGame();
+            {
+                if (settingsPanel.activeSelf || controlsPanel.activeSelf)
+                    OpenPauseMenu();
+                else
+                    ResumeGame();
+            }
             else
+            {
                 PauseGame();
+            }
         }
     }
 
-    void PauseGame()
+    public void PauseGame()
     {
         isPaused = true;
+        Time.timeScale = 0f;
+
         pauseMenuPanel.SetActive(true);
-        Time.timeScale = 0f; // freezes everything in the game
+        settingsPanel.SetActive(false);
+        controlsPanel.SetActive(false);
+
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
 
-    void ResumeGame()
+    public void ResumeGame()
     {
         isPaused = false;
+        Time.timeScale = 1f;
+
         pauseMenuPanel.SetActive(false);
         settingsPanel.SetActive(false);
         controlsPanel.SetActive(false);
-        Time.timeScale = 1f; // unfreeze
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
-    // Called by buttons
     public void OpenSettings()
     {
+        pauseMenuPanel.SetActive(false);
         settingsPanel.SetActive(true);
+        controlsPanel.SetActive(false);
     }
 
     public void OpenControls()
     {
+        pauseMenuPanel.SetActive(false);
+        settingsPanel.SetActive(false);
         controlsPanel.SetActive(true);
     }
 
-    public void CloseSettings()
+    public void OpenPauseMenu()
     {
+        pauseMenuPanel.SetActive(true);
         settingsPanel.SetActive(false);
-    }
-
-    public void CloseControls()
-    {
         controlsPanel.SetActive(false);
     }
 
-    public void MainMenu()
+    public void GoToMainMenu()
     {
-        // You can load main menu scene here
-        Debug.Log("Main Menu button clicked!");
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("MainMenu"); // replace with your main menu scene name
     }
 
-    void OnImmersiveToggleChanged(bool isOn)
+    private void OnImmersiveToggle(bool enabled)
     {
-        foreach (GameObject uiElement in uiToHideInImmersive)
-        {
-            if (uiElement != null)
-                uiElement.SetActive(!isOn);
-        }
-    }
-
-    // Audio control example
-    public void SetMasterVolume(float volume)
-    {
-        if (masterMixer != null)
-            masterMixer.SetFloat("MasterVolume", Mathf.Log10(volume) * 20);
+        Debug.Log("Immersive mode: " + enabled);
+        // hide/show extra UI elements here if desired
     }
 }
