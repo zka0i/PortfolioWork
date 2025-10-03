@@ -10,14 +10,19 @@ public class EnemySpawner : MonoBehaviour
     public class EnemyVariant
     {
         public GameObject prefab;
-        [Range(0f, 100f)] public float baseWeight = 10f; // spawn chance weight
-        [Range(0f, 5f)] public float weightIncreasePerWave = 1f; // how much this variant gets more common each wave
+        [Range(0f, 100f)] public float baseWeight = 10f;
+        [Range(0f, 5f)] public float weightIncreasePerWave = 1f;
     }
 
     [Header("Spawn Settings")]
     public List<EnemyVariant> enemyVariants = new List<EnemyVariant>();
     public List<Transform> spawnPoints = new List<Transform>();
-    public float spawnInterval = 2f;
+
+    [Tooltip("Base interval between each spawn tick (will be divided by spawnRateMultiplier)")]
+    public float groupSpawnInterval = 2f;
+
+    [Tooltip("How many enemies spawn each tick (group)")]
+    public int groupSize = 3;
 
     [Header("Scaling")]
     [HideInInspector] public float spawnRateMultiplier = 1f;
@@ -37,7 +42,6 @@ public class EnemySpawner : MonoBehaviour
     [HideInInspector] public float timer;
     [HideInInspector] public bool spawningStopped = true;
 
-    private float spawnCooldown = 0f;
     private List<GameObject> activeEnemies = new List<GameObject>();
     private int currentSpawnIndex = 0;
     private int currentWave = 1;
@@ -46,6 +50,8 @@ public class EnemySpawner : MonoBehaviour
 
     private float cleanupTimer = 0f;
     private const float cleanupInterval = 2f;
+
+    private float nextSpawnTime = 0f;
 
     void Start()
     {
@@ -69,10 +75,11 @@ public class EnemySpawner : MonoBehaviour
                 return;
             }
 
-            if (Time.time >= spawnCooldown)
+            // ✅ Spawn enemies in groups at intervals, respecting spawnRateMultiplier
+            if (Time.time >= nextSpawnTime)
             {
-                SpawnEnemy();
-                spawnCooldown = Time.time + (spawnInterval / Mathf.Max(0.1f, spawnRateMultiplier));
+                SpawnEnemyGroup();
+                nextSpawnTime = Time.time + (groupSpawnInterval / Mathf.Max(0.1f, spawnRateMultiplier));
             }
         }
 
@@ -97,40 +104,43 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
-    void SpawnEnemy()
+    void SpawnEnemyGroup()
     {
         if (spawnPoints.Count == 0 || enemyVariants.Count == 0) return;
 
-        Transform spawnPoint = spawnPoints[currentSpawnIndex];
-        GameObject prefabToSpawn = GetWeightedEnemyPrefab();
-        if (prefabToSpawn == null) return;
-
-        GameObject enemy = Instantiate(prefabToSpawn, spawnPoint.position, spawnPoint.rotation);
-
-        // ✅ Scale NavMeshAgent speed using EnemyMovement's originalSpeed
-        NavMeshAgent agent = enemy.GetComponent<NavMeshAgent>();
-        EnemyMovement movement = enemy.GetComponent<EnemyMovement>();
-        if (agent != null && movement != null)
+        for (int i = 0; i < groupSize; i++)
         {
-            agent.speed = movement.originalSpeed * enemySpeedMultiplier;
-        }
+            Transform spawnPoint = spawnPoints[currentSpawnIndex];
+            GameObject prefabToSpawn = GetWeightedEnemyPrefab();
+            if (prefabToSpawn == null) return;
 
-        // ✅ Scale enemy damage
-        Enemy enemyScript = enemy.GetComponent<Enemy>();
-        if (enemyScript != null)
-        {
-            enemyScript.damageAmount *= enemyDamageMultiplier;
-        }
+            GameObject enemy = Instantiate(prefabToSpawn, spawnPoint.position, spawnPoint.rotation);
 
-        // ✅ Ensure audio exists
-        if (!enemy.TryGetComponent(out AudioSource audio))
-        {
-            audio = enemy.AddComponent<AudioSource>();
-            audio.playOnAwake = false;
-        }
+            // ✅ Scale NavMeshAgent speed using EnemyMovement's originalSpeed
+            NavMeshAgent agent = enemy.GetComponent<NavMeshAgent>();
+            EnemyMovement movement = enemy.GetComponent<EnemyMovement>();
+            if (agent != null && movement != null)
+            {
+                agent.speed = movement.originalSpeed * enemySpeedMultiplier;
+            }
 
-        activeEnemies.Add(enemy);
-        currentSpawnIndex = (currentSpawnIndex + 1) % spawnPoints.Count;
+            // ✅ Scale enemy damage
+            Enemy enemyScript = enemy.GetComponent<Enemy>();
+            if (enemyScript != null)
+            {
+                enemyScript.damageAmount *= enemyDamageMultiplier;
+            }
+
+            // ✅ Ensure audio exists
+            if (!enemy.TryGetComponent(out AudioSource audio))
+            {
+                audio = enemy.AddComponent<AudioSource>();
+                audio.playOnAwake = false;
+            }
+
+            activeEnemies.Add(enemy);
+            currentSpawnIndex = (currentSpawnIndex + 1) % spawnPoints.Count;
+        }
     }
 
     GameObject GetWeightedEnemyPrefab()
@@ -153,7 +163,7 @@ public class EnemySpawner : MonoBehaviour
                 return variant.prefab;
         }
 
-        return enemyVariants[0].prefab; // fallback
+        return enemyVariants[0].prefab;
     }
 
     void CleanupNullEnemies()
@@ -202,12 +212,12 @@ public class EnemySpawner : MonoBehaviour
         spawningStopped = false;
         timerText?.gameObject.SetActive(true);
         remainingEnemiesText?.gameObject.SetActive(false);
+        nextSpawnTime = Time.time; // ✅ allow immediate spawn when wave starts
     }
 
     public void ResetSpawner()
     {
         timer = spawnDuration;
-        spawnCooldown = 0f;
         spawningStopped = true;
 
         foreach (GameObject enemy in activeEnemies)

@@ -69,7 +69,7 @@ public class MainMenuManager : MonoBehaviour
 
         // setup UI
         if (loadingText != null) loadingText.text = "";
-        if (readyButtonText != null) readyButtonText.text = "Ready";
+        if (readyButtonText != null) readyButtonText.text = "READY";
 
         if (readyButton != null) readyButton.onClick.AddListener(OnReadyClicked);
         if (perksButton != null) perksButton.onClick.AddListener(OnPerksClicked);
@@ -119,7 +119,7 @@ public class MainMenuManager : MonoBehaviour
         currentTarget = mainCameraPosition;
 
         if (readyButtonText != null)
-            readyButtonText.text = "Unready";
+            readyButtonText.text = "UNREADY";
 
         // Wait until the camera underlying position has nearly reached the target so it feels deliberate
         yield return StartCoroutine(WaitForCameraToReachTarget(0.05f, 2.0f));
