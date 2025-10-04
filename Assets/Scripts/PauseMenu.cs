@@ -61,6 +61,7 @@ public class PauseMenu : MonoBehaviour
 
     public void ResumeGame()
     {
+        Debug.Log("Resume button clicked!");
         isPaused = false;
         Time.timeScale = 1f;
 
