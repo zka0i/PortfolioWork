@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -11,8 +11,13 @@ public class PauseMenu : MonoBehaviour
 
     [Header("Optional UI")]
     public Toggle immersiveToggle;
+    public Slider volumeSlider;
+
+    [Header("UI to Hide in Immersive Mode")]
+    public GameObject[] uiElementsToHide;
 
     private bool isPaused;
+    private bool immersiveModeEnabled;
 
     void Start()
     {
@@ -21,6 +26,14 @@ public class PauseMenu : MonoBehaviour
         if (settingsPanel) settingsPanel.SetActive(false);
         if (controlsPanel) controlsPanel.SetActive(false);
 
+        // Initialize Volume Slider
+        if (volumeSlider)
+        {
+            volumeSlider.value = AudioListener.volume;
+            volumeSlider.onValueChanged.AddListener(SetVolume);
+        }
+
+        // Setup Toggle
         if (immersiveToggle)
             immersiveToggle.onValueChanged.AddListener(OnImmersiveToggle);
 
@@ -30,6 +43,7 @@ public class PauseMenu : MonoBehaviour
 
     void Update()
     {
+        // 🔹 Handle Escape key
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (isPaused)
@@ -42,6 +56,16 @@ public class PauseMenu : MonoBehaviour
             else
             {
                 PauseGame();
+            }
+        }
+
+        // 🔹 Enforce hidden UI when immersive mode is ON
+        if (immersiveModeEnabled)
+        {
+            foreach (var ui in uiElementsToHide)
+            {
+                if (ui != null && ui.activeSelf)
+                    ui.SetActive(false);
             }
         }
     }
@@ -61,7 +85,6 @@ public class PauseMenu : MonoBehaviour
 
     public void ResumeGame()
     {
-        Debug.Log("Resume button clicked!");
         isPaused = false;
         Time.timeScale = 1f;
 
@@ -97,12 +120,23 @@ public class PauseMenu : MonoBehaviour
     public void GoToMainMenu()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("MainMenu"); // replace with your main menu scene name
+        SceneManager.LoadScene("MainMenu");
+    }
+
+    private void SetVolume(float value)
+    {
+        AudioListener.volume = value;
     }
 
     private void OnImmersiveToggle(bool enabled)
     {
+        immersiveModeEnabled = enabled;
         Debug.Log("Immersive mode: " + enabled);
-        // hide/show extra UI elements here if desired
+
+        foreach (var ui in uiElementsToHide)
+        {
+            if (ui != null)
+                ui.SetActive(!enabled);
+        }
     }
 }
